@@ -724,6 +724,29 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	set = vld_set_create(opa->last);
 	branch_info = vld_branch_info_create(opa->last);
 
+	if (VLD_G(serialize)) {
+		OpcodeList opcodeList = OPCODE_LIST__INIT;
+		Opcode **opcodes;
+		opcodes = malloc(sizeof(Opcode*) * opa->last);
+		for (int i = 0; i < opa->last; i++) {
+			opcodes[i] = malloc(sizeof(Opcode));
+			opcode__init(opcodes[i]);
+			opcodes[i]->name = opa->opcodes[i].opcode;
+		}
+		opcodeList.n_codes = opa->last;
+		opcodeList.codes = opcodes;
+		unsigned len = opcode_list__get_packed_size(&opcodeList);
+		void *buf = malloc(len);
+		opcode_list__pack(&opcodeList, buf);
+		fprintf(stderr, "Writing %d serialized bytes\n", len);
+		fwrite(buf, len, 1, stdout);
+		free(buf);
+		for (int i = 0; i < opa->last; i++) {
+			free(opcodes[i]);
+		}
+		free(opcodes);
+	}	
+
 	if (VLD_G(dump_paths)) {
 		vld_analyse_oparray(opa, set, branch_info TSRMLS_CC);
 	}
