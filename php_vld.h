@@ -48,6 +48,8 @@ ZEND_BEGIN_MODULE_GLOBALS(vld)
 	FILE *path_dump_file;
 	int dump_paths;
 	int serialize;
+	char *serialize_dir;
+	FILE *serialize_file;
 ZEND_END_MODULE_GLOBALS(vld) 
 
 int vld_printf(FILE *stream, const char* fmt, ...);

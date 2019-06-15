@@ -76,17 +76,18 @@ ZEND_GET_MODULE(vld)
 ZEND_DECLARE_MODULE_GLOBALS(vld)
 
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("vld.active",       "0", PHP_INI_SYSTEM, OnUpdateBool, active,       zend_vld_globals, vld_globals)
-    STD_PHP_INI_ENTRY("vld.skip_prepend", "0", PHP_INI_SYSTEM, OnUpdateBool, skip_prepend, zend_vld_globals, vld_globals)
-    STD_PHP_INI_ENTRY("vld.skip_append",  "0", PHP_INI_SYSTEM, OnUpdateBool, skip_append,  zend_vld_globals, vld_globals)
-    STD_PHP_INI_ENTRY("vld.execute",      "1", PHP_INI_SYSTEM, OnUpdateBool, execute,      zend_vld_globals, vld_globals)
-    STD_PHP_INI_ENTRY("vld.verbosity",    "1", PHP_INI_SYSTEM, OnUpdateBool, verbosity,    zend_vld_globals, vld_globals)
-    STD_PHP_INI_ENTRY("vld.format",       "0", PHP_INI_SYSTEM, OnUpdateBool, format,       zend_vld_globals, vld_globals)
-    STD_PHP_INI_ENTRY("vld.col_sep",      "\t", PHP_INI_SYSTEM, OnUpdateString, col_sep,   zend_vld_globals, vld_globals)
-	STD_PHP_INI_ENTRY("vld.save_dir",     "/tmp", PHP_INI_SYSTEM, OnUpdateString, save_dir, zend_vld_globals, vld_globals)
-	STD_PHP_INI_ENTRY("vld.save_paths",   "0", PHP_INI_SYSTEM, OnUpdateBool, save_paths,   zend_vld_globals, vld_globals)
-	STD_PHP_INI_ENTRY("vld.dump_paths",   "1", PHP_INI_SYSTEM, OnUpdateBool, dump_paths,   zend_vld_globals, vld_globals)
-	STD_PHP_INI_ENTRY("vld.serialize",    "0", PHP_INI_SYSTEM, OnUpdateBool, serialize,    zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.active",            "0", PHP_INI_SYSTEM, OnUpdateBool, active,       zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.skip_prepend",      "0", PHP_INI_SYSTEM, OnUpdateBool, skip_prepend, zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.skip_append",       "0", PHP_INI_SYSTEM, OnUpdateBool, skip_append,  zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.execute",           "1", PHP_INI_SYSTEM, OnUpdateBool, execute,      zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.verbosity",         "1", PHP_INI_SYSTEM, OnUpdateBool, verbosity,    zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.format",            "0", PHP_INI_SYSTEM, OnUpdateBool, format,       zend_vld_globals, vld_globals)
+    STD_PHP_INI_ENTRY("vld.col_sep",           "\t", PHP_INI_SYSTEM, OnUpdateString, col_sep,   zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.save_dir",          "/tmp", PHP_INI_SYSTEM, OnUpdateString, save_dir, zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.save_paths",        "0", PHP_INI_SYSTEM, OnUpdateBool, save_paths,   zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.dump_paths",        "1", PHP_INI_SYSTEM, OnUpdateBool, dump_paths,   zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.serialize",         "0", PHP_INI_SYSTEM, OnUpdateBool, serialize,    zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.serialize_dir",     "/tmp", PHP_INI_SYSTEM, OnUpdateString, serialize_dir, zend_vld_globals, vld_globals)
 PHP_INI_END()
  
 static void vld_init_globals(zend_vld_globals *vld_globals)
@@ -102,6 +103,7 @@ static void vld_init_globals(zend_vld_globals *vld_globals)
 	vld_globals->save_paths   = 0;
 	vld_globals->verbosity    = 1;
 	vld_globals->serialize    = 0;
+	vld_globals->serialize_file = NULL;
 }
 
 
@@ -172,6 +174,16 @@ PHP_RINIT_FUNCTION(vld)
 			fprintf(VLD_G(path_dump_file), "digraph {\n");
 		}
 	}
+
+	if (VLD_G(serialize)) {
+		char *filename;
+
+		filename = malloc(strlen("opcodes.dump") + strlen(VLD_G(serialize_dir)) + 2);
+		sprintf(filename, "%s/%s", VLD_G(serialize_dir), "opcodes.dump");
+
+		VLD_G(serialize_file) = fopen(filename, "w");
+		free(filename);		
+	}
 	return SUCCESS;
 }
 
@@ -189,6 +201,10 @@ PHP_RSHUTDOWN_FUNCTION(vld)
 	if (VLD_G(path_dump_file)) {
 		fprintf(VLD_G(path_dump_file), "}\n");
 		fclose(VLD_G(path_dump_file));
+	}
+
+	if (VLD_G(serialize_file)) {
+		fclose(VLD_G(serialize_file));
 	}
 
 	return SUCCESS;

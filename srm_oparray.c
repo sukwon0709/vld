@@ -739,7 +739,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		void *buf = malloc(len);
 		opcode_list__pack(&opcodeList, buf);
 		fprintf(stderr, "Writing %d serialized bytes\n", len);
-		fwrite(buf, len, 1, stdout);
+		fwrite(buf, len, 1, VLD_G(serialize_file));
 		free(buf);
 		for (int i = 0; i < opa->last; i++) {
 			free(opcodes[i]);
