@@ -1174,7 +1174,7 @@ const ProtobufCMessageDescriptor opcode_list__descriptor =
   (ProtobufCMessageInit) opcode_list__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor opcode__field_descriptors[3] =
+static const ProtobufCFieldDescriptor opcode__field_descriptors[5] =
 {
   {
     "name",
@@ -1212,16 +1212,42 @@ static const ProtobufCFieldDescriptor opcode__field_descriptors[3] =
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "res",
+    4,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    offsetof(Opcode, res),
+    &znode__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "fetch",
+    5,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_ENUM,
+    0,   /* quantifier_offset */
+    offsetof(Opcode, fetch),
+    &fetch_type__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned opcode__field_indices_by_name[] = {
+  4,   /* field[4] = fetch */
   0,   /* field[0] = name */
   1,   /* field[1] = op1 */
   2,   /* field[2] = op2 */
+  3,   /* field[3] = res */
 };
 static const ProtobufCIntRange opcode__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 3 }
+  { 0, 5 }
 };
 const ProtobufCMessageDescriptor opcode__descriptor =
 {
@@ -1231,7 +1257,7 @@ const ProtobufCMessageDescriptor opcode__descriptor =
   "Opcode",
   "",
   sizeof(Opcode),
-  3,
+  5,
   opcode__field_descriptors,
   opcode__field_indices_by_name,
   1,  opcode__number_ranges,
@@ -1602,6 +1628,44 @@ const ProtobufCEnumDescriptor znode_type__descriptor =
   znode_type__enum_values_by_name,
   1,
   znode_type__value_ranges,
+  NULL,NULL,NULL,NULL   /* reserved[1234] */
+};
+static const ProtobufCEnumValue fetch_type__enum_values_by_number[7] =
+{
+  { "GLOBAL", "FETCH_TYPE__GLOBAL", 0 },
+  { "LOCAL", "FETCH_TYPE__LOCAL", 1 },
+  { "STATIC", "FETCH_TYPE__STATIC", 2 },
+  { "STATIC_MEMBER", "FETCH_TYPE__STATIC_MEMBER", 3 },
+  { "GLOBAL_LOCK", "FETCH_TYPE__GLOBAL_LOCK", 4 },
+  { "UNKNOWN", "FETCH_TYPE__UNKNOWN", 5 },
+  { "AUTO_GLOBAL", "FETCH_TYPE__AUTO_GLOBAL", 6 },
+};
+static const ProtobufCIntRange fetch_type__value_ranges[] = {
+{0, 0},{0, 7}
+};
+static const ProtobufCEnumValueIndex fetch_type__enum_values_by_name[7] =
+{
+  { "AUTO_GLOBAL", 6 },
+  { "GLOBAL", 0 },
+  { "GLOBAL_LOCK", 4 },
+  { "LOCAL", 1 },
+  { "STATIC", 2 },
+  { "STATIC_MEMBER", 3 },
+  { "UNKNOWN", 5 },
+};
+const ProtobufCEnumDescriptor fetch_type__descriptor =
+{
+  PROTOBUF_C__ENUM_DESCRIPTOR_MAGIC,
+  "FetchType",
+  "FetchType",
+  "FetchType",
+  "",
+  7,
+  fetch_type__enum_values_by_number,
+  7,
+  fetch_type__enum_values_by_name,
+  1,
+  fetch_type__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
 static const ProtobufCEnumValue zval_type__enum_values_by_number[10] =

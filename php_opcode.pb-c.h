@@ -204,6 +204,16 @@ typedef enum _ZnodeType {
   ZNODE_TYPE__IS_CLASS = 8
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(ZNODE_TYPE)
 } ZnodeType;
+typedef enum _FetchType {
+  FETCH_TYPE__GLOBAL = 0,
+  FETCH_TYPE__LOCAL = 1,
+  FETCH_TYPE__STATIC = 2,
+  FETCH_TYPE__STATIC_MEMBER = 3,
+  FETCH_TYPE__GLOBAL_LOCK = 4,
+  FETCH_TYPE__UNKNOWN = 5,
+  FETCH_TYPE__AUTO_GLOBAL = 6
+    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(FETCH_TYPE)
+} FetchType;
 typedef enum _ZvalType {
   ZVAL_TYPE__IS_NULL = 0,
   ZVAL_TYPE__IS_LONG = 1,
@@ -381,10 +391,12 @@ struct  _Opcode
   OpcodeName name;
   Znode *op1;
   Znode *op2;
+  Znode *res;
+  FetchType fetch;
 };
 #define OPCODE__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&opcode__descriptor) \
-    , OPCODE_NAME__NOP, NULL, NULL }
+    , OPCODE_NAME__NOP, NULL, NULL, NULL, FETCH_TYPE__GLOBAL }
 
 
 /* ZvalNull methods */
@@ -705,6 +717,7 @@ typedef void (*Opcode_Closure)
 
 extern const ProtobufCEnumDescriptor    opcode_name__descriptor;
 extern const ProtobufCEnumDescriptor    znode_type__descriptor;
+extern const ProtobufCEnumDescriptor    fetch_type__descriptor;
 extern const ProtobufCEnumDescriptor    zval_type__descriptor;
 extern const ProtobufCMessageDescriptor zval_null__descriptor;
 extern const ProtobufCMessageDescriptor zval_long__descriptor;

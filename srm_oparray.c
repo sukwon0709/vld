@@ -351,7 +351,7 @@ int vld_dump_zval (zval val)
 }
 
 
-int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsigned int base_address TSRMLS_DC)
+int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsigned int base_address, Znode *znode_ptr TSRMLS_DC)
 {
 	int len = 0;
 
@@ -364,13 +364,16 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 	switch (node_type) {
 		case IS_UNUSED:
 			VLD_PRINT(3, " IS_UNUSED ");
+			if (VLD_G(serialize)) {
+				znode_ptr->type = ZNODE_TYPE__IS_UNUSED;
+			}			
 			break;
 		case IS_CONST: /* 1 */
 #if PHP_VERSION_ID >= 70000
 			VLD_PRINT1(3, " IS_CONST (%d) ", VLD_ZNODE_ELEM(node, var) / sizeof(zval));
 #else
 			VLD_PRINT1(3, " IS_CONST (%d) ", VLD_ZNODE_ELEM(node, var) / sizeof(temp_variable));
-#endif
+#endif			
 #if PHP_VERSION_ID >= 70000
 			vld_dump_zval(*node.zv);
 #else
@@ -380,15 +383,24 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 			vld_dump_zval(node.u.constant);
 # endif
 #endif
+			if (VLD_G(serialize)) {
+				znode_ptr->type = ZNODE_TYPE__IS_CONST;
+			}			
 			break;
 #ifdef ZEND_ENGINE_2
 		case IS_TMP_VAR: /* 2 */
 			VLD_PRINT(3, " IS_TMP_VAR ");
 			len += vld_printf (stderr, "~%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
+			if (VLD_G(serialize)) {
+				znode_ptr->type = ZNODE_TYPE__IS_TMP_VAR;
+			}			
 			break;
 		case IS_VAR: /* 4 */
 			VLD_PRINT(3, " IS_VAR ");
 			len += vld_printf (stderr, "$%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
+			if (VLD_G(serialize)) {
+				znode_ptr->type = ZNODE_TYPE__IS_VAR;
+			}			
 			break;
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
 		case IS_CV:  /* 16 */
@@ -398,6 +410,9 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 #else
 			len += vld_printf (stderr, "!%d", VLD_ZNODE_ELEM(node, var));
 #endif
+			if (VLD_G(serialize)) {
+				znode_ptr->type = ZNODE_TYPE__IS_CV;
+			}
 			break;
 #endif
 		case VLD_IS_OPNUM:
@@ -406,6 +421,9 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 #else
 			len += vld_printf (stderr, "->%d", VLD_ZNODE_ELEM(node, opline_num));
 #endif
+			if (VLD_G(serialize)) {
+				znode_ptr->type = ZNODE_TYPE__IS_OPNUM;
+			}			
 			break;
 		case VLD_IS_OPLINE:
 #if PHP_VERSION_ID >= 70000
@@ -413,9 +431,15 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 #else
 			len += vld_printf (stderr, "->%d", (VLD_ZNODE_ELEM(node, opline_num) - base_address) / sizeof(zend_op));
 #endif
+			if (VLD_G(serialize)) {
+				znode_ptr->type = ZNODE_TYPE__IS_OPLINE;
+			}
 			break;
 		case VLD_IS_CLASS:
 			len += vld_printf (stderr, ":%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
+			if (VLD_G(serialize)) {
+				znode_ptr->type = ZNODE_TYPE__IS_CLASS;
+			}			
 			break;
 #else
 		case IS_TMP_VAR: /* 2 */
@@ -526,7 +550,7 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 
 #define NUM_KNOWN_OPCODES (sizeof(opcodes)/sizeof(opcodes[0]))
 
-void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdead, int entry, int start, int end, zend_op_array *opa TSRMLS_DC)
+void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdead, int entry, int start, int end, Opcode *opcode, zend_op_array *opa TSRMLS_DC)
 {
 	static uint last_lineno = (uint) -1;
 	int print_sep = 0, len;
@@ -575,28 +599,49 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		switch (op.VLD_EXTENDED_VALUE(op2)) {
 			case ZEND_FETCH_GLOBAL:
 				fetch_type = "global";
+				if (VLD_G(serialize)) {
+					opcode->fetch = FETCH_TYPE__GLOBAL;
+				}				
 				break;
 			case ZEND_FETCH_LOCAL:
 				fetch_type = "local";
+				if (VLD_G(serialize)) {
+					opcode->fetch = FETCH_TYPE__LOCAL;
+				}
 				break;
 			case ZEND_FETCH_STATIC:
 				fetch_type = "static";
+				if (VLD_G(serialize)) {
+					opcode->fetch = FETCH_TYPE__STATIC;
+				}
 				break;
 			case ZEND_FETCH_STATIC_MEMBER:
 				fetch_type = "static member";
+				if (VLD_G(serialize)) {
+					opcode->fetch = FETCH_TYPE__STATIC_MEMBER;
+				}
 				break;
 #ifdef ZEND_FETCH_GLOBAL_LOCK
 			case ZEND_FETCH_GLOBAL_LOCK:
 				fetch_type = "global lock";
+				if (VLD_G(serialize)) {
+					opcode->fetch = FETCH_TYPE__GLOBAL_LOCK;
+				}
 				break;
 #endif
 #ifdef ZEND_FETCH_AUTO_GLOBAL
 			case ZEND_FETCH_AUTO_GLOBAL:
 				fetch_type = "auto global";
+				if (VLD_G(serialize)) {
+					opcode->fetch = FETCH_TYPE__AUTO_GLOBAL;
+				}
 				break;
 #endif
 			default:
 				fetch_type = "unknown";
+				if (VLD_G(serialize)) {
+					opcode->fetch = FETCH_TYPE__UNKNOWN;
+				}
 				break;
 		}
 #else 
@@ -626,8 +671,12 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 			vld_printf(stderr, "%5d %s %c %c %c %c %s %-28s %s %-14s ", nr, VLD_G(col_sep), notdead ? ' ' : '*', entry ? 'E' : ' ', start ? '>' : ' ', end ? '>' : ' ', VLD_G(col_sep), opcodes[op.opcode].name, VLD_G(col_sep), fetch_type);
 		} else {
 			vld_printf(stderr, "%5d%c %c %c %c %-28s %-14s ", nr, notdead ? ' ' : '*', entry ? 'E' : ' ', start ? '>' : ' ', end ? '>' : ' ', opcodes[op.opcode].name, fetch_type);
-		}
+		}		
 	}
+
+	if (VLD_G(serialize)) {
+		opcode->name = op.opcode;
+	}	
 
 	if (flags & EXT_VAL) {
 		vld_printf(stderr, "%3d  ", op.extended_value);
@@ -635,9 +684,16 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		vld_printf(stderr, "     ");
 	}
 
-	if ((flags & RES_USED) && !(op.VLD_EXTENDED_VALUE(result) & EXT_TYPE_UNUSED)) {
-		VLD_PRINT(3, " RES[ ");
-		len = vld_dump_znode (NULL, res_type, op.result, base_address TSRMLS_CC);
+	if ((flags & RES_USED) && !(op.VLD_EXTENDED_VALUE(result) & EXT_TYPE_UNUSED)) {		
+		VLD_PRINT(3, " RES[ ");		
+		if (VLD_G(serialize)) {
+			Znode znode = ZNODE__INIT;
+			len = vld_dump_znode (NULL, res_type, op.result, base_address, &znode TSRMLS_CC);
+			opcode->res = malloc(sizeof(Znode));
+			*opcode->res = znode;
+		} else {
+			len = vld_dump_znode (NULL, res_type, op.result, base_address, NULL TSRMLS_CC);
+		}
 		VLD_PRINT(3, " ]");
 		if (VLD_G(format)) {
 			if (len==0) {
@@ -647,13 +703,33 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 			vld_printf(stderr, "%*s", 8-len, " ");
 		}
 	} else {
+		// Result is not used
+		if (VLD_G(serialize)) {
+			opcode->res = malloc(sizeof(Znode));
+			znode__init(opcode->res);
+			opcode->res->type = ZNODE_TYPE__IS_UNUSED;
+		}
 		vld_printf(stderr, "        ");
 	}
 
 	if (flags & OP1_USED) {
 		VLD_PRINT(3, " OP1[ ");
-		vld_dump_znode (&print_sep, op1_type, op.op1, base_address TSRMLS_CC);
+		if (VLD_G(serialize)) {
+			Znode znode = ZNODE__INIT;
+			vld_dump_znode (&print_sep, op1_type, op.op1, base_address, &znode TSRMLS_CC);
+			opcode->op1 = malloc(sizeof(Znode));
+			*opcode->op1 = znode;
+		} else {
+			vld_dump_znode (&print_sep, op1_type, op.op1, base_address, NULL TSRMLS_CC);
+		}		
 		VLD_PRINT(3, " ]");
+	} else {
+		// op1 is unused
+		if (VLD_G(serialize)) {
+			opcode->op1 = malloc(sizeof(Znode));
+			znode__init(opcode->op1);
+			opcode->op1->type = ZNODE_TYPE__IS_UNUSED;
+		}
 	}		
 	if (flags & OP2_USED) {
 		VLD_PRINT(3, " OP2[ ");
@@ -686,7 +762,15 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 					break;
 			}
 		} else {
-			vld_dump_znode (&print_sep, op2_type, op.op2, base_address TSRMLS_CC);
+			// op2 is not include related
+			if (VLD_G(serialize)) {
+				Znode znode = ZNODE__INIT;				
+				vld_dump_znode (&print_sep, op2_type, op.op2, base_address, &znode TSRMLS_CC);
+				opcode->op2 = malloc(sizeof(Znode));
+				*opcode->op2 = znode;
+			} else {
+				vld_dump_znode (&print_sep, op2_type, op.op2, base_address, NULL TSRMLS_CC);
+			}
 		}
 		VLD_PRINT(3, " ]");
 	}
@@ -704,9 +788,15 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		vld_printf (stderr, ", ->%d", jmp);
 		VLD_PRINT(3, " ]");
 	}
-	if (flags & NOP2_OPNUM) {
+	if (flags & NOP2_OPNUM) {		
 		zend_op next_op = op_ptr[nr+1];
-		vld_dump_znode (&print_sep, VLD_IS_OPNUM, next_op.op2, base_address TSRMLS_CC);
+		if (VLD_G(serialize)) {
+			Znode *next_node = malloc(sizeof(Znode));
+			znode__init(next_node);
+			vld_dump_znode (&print_sep, VLD_IS_OPNUM, next_op.op2, base_address, next_node TSRMLS_CC);
+		} else {
+			vld_dump_znode (&print_sep, VLD_IS_OPNUM, next_op.op2, base_address, NULL TSRMLS_CC);
+		}
 	}
 	vld_printf (stderr, "\n");
 }
@@ -724,28 +814,17 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	set = vld_set_create(opa->last);
 	branch_info = vld_branch_info_create(opa->last);
 
+	OpcodeList *opcodeList = NULL;
+	Opcode **opcodes = NULL;
 	if (VLD_G(serialize)) {
-		OpcodeList opcodeList = OPCODE_LIST__INIT;
-		Opcode **opcodes;
+		opcodeList = malloc(sizeof(OpcodeList));
+		opcode_list__init(opcodeList);
 		opcodes = malloc(sizeof(Opcode*) * opa->last);
 		for (int i = 0; i < opa->last; i++) {
 			opcodes[i] = malloc(sizeof(Opcode));
 			opcode__init(opcodes[i]);
-			opcodes[i]->name = opa->opcodes[i].opcode;
 		}
-		opcodeList.n_codes = opa->last;
-		opcodeList.codes = opcodes;
-		unsigned len = opcode_list__get_packed_size(&opcodeList);
-		void *buf = malloc(len);
-		opcode_list__pack(&opcodeList, buf);
-		fprintf(stderr, "Writing %d serialized bytes\n", len);
-		fwrite(buf, len, 1, VLD_G(serialize_file));
-		free(buf);
-		for (int i = 0; i < opa->last; i++) {
-			free(opcodes[i]);
-		}
-		free(opcodes);
-	}	
+	}
 
 	if (VLD_G(dump_paths)) {
 		vld_analyse_oparray(opa, set, branch_info TSRMLS_CC);
@@ -775,7 +854,13 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		vld_printf(stderr, "-------------------------------------------------------------------------------------\n");
 	}
 	for (i = 0; i < opa->last; i++) {
-		vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i), vld_set_in(branch_info->entry_points, i), vld_set_in(branch_info->starts, i), vld_set_in(branch_info->ends, i), opa TSRMLS_CC);
+		if (VLD_G(serialize)) {
+			Opcode opcode = OPCODE__INIT;
+			vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i), vld_set_in(branch_info->entry_points, i), vld_set_in(branch_info->starts, i), vld_set_in(branch_info->ends, i), &opcode, opa TSRMLS_CC);
+			*opcodes[i] = opcode;
+		} else {
+			vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i), vld_set_in(branch_info->entry_points, i), vld_set_in(branch_info->starts, i), vld_set_in(branch_info->ends, i), NULL, opa TSRMLS_CC);
+		}		
 	}
 	vld_printf(stderr, "\n");
 
@@ -783,6 +868,22 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		vld_branch_post_process(opa, branch_info);
 		vld_branch_find_paths(branch_info);
 		vld_branch_info_dump(opa, branch_info TSRMLS_CC);
+	}
+
+	if (VLD_G(serialize)) {		
+		opcodeList->n_codes = opa->last;
+		opcodeList->codes = opcodes;
+		unsigned len = opcode_list__get_packed_size(opcodeList);
+		void *buf = malloc(len);
+		opcode_list__pack(opcodeList, buf);
+		fprintf(stderr, "Writing %d serialized bytes\n", len);
+		fwrite(buf, len, 1, VLD_G(serialize_file));
+		free(buf);
+		for (int i = 0; i < opa->last; i++) {
+			free(opcodes[i]);
+		}
+		free(opcodes);
+		free(opcodeList);
 	}
 
 	vld_set_free(set);
