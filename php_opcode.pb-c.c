@@ -7,6 +7,546 @@
 #endif
 
 #include "proto/php_opcode.pb-c.h"
+void   zval_null__init
+                     (ZvalNull         *message)
+{
+  static const ZvalNull init_value = ZVAL_NULL__INIT;
+  *message = init_value;
+}
+size_t zval_null__get_packed_size
+                     (const ZvalNull *message)
+{
+  assert(message->base.descriptor == &zval_null__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t zval_null__pack
+                     (const ZvalNull *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &zval_null__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t zval_null__pack_to_buffer
+                     (const ZvalNull *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &zval_null__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+ZvalNull *
+       zval_null__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (ZvalNull *)
+     protobuf_c_message_unpack (&zval_null__descriptor,
+                                allocator, len, data);
+}
+void   zval_null__free_unpacked
+                     (ZvalNull *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &zval_null__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   zval_long__init
+                     (ZvalLong         *message)
+{
+  static const ZvalLong init_value = ZVAL_LONG__INIT;
+  *message = init_value;
+}
+size_t zval_long__get_packed_size
+                     (const ZvalLong *message)
+{
+  assert(message->base.descriptor == &zval_long__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t zval_long__pack
+                     (const ZvalLong *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &zval_long__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t zval_long__pack_to_buffer
+                     (const ZvalLong *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &zval_long__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+ZvalLong *
+       zval_long__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (ZvalLong *)
+     protobuf_c_message_unpack (&zval_long__descriptor,
+                                allocator, len, data);
+}
+void   zval_long__free_unpacked
+                     (ZvalLong *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &zval_long__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   zval_double__init
+                     (ZvalDouble         *message)
+{
+  static const ZvalDouble init_value = ZVAL_DOUBLE__INIT;
+  *message = init_value;
+}
+size_t zval_double__get_packed_size
+                     (const ZvalDouble *message)
+{
+  assert(message->base.descriptor == &zval_double__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t zval_double__pack
+                     (const ZvalDouble *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &zval_double__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t zval_double__pack_to_buffer
+                     (const ZvalDouble *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &zval_double__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+ZvalDouble *
+       zval_double__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (ZvalDouble *)
+     protobuf_c_message_unpack (&zval_double__descriptor,
+                                allocator, len, data);
+}
+void   zval_double__free_unpacked
+                     (ZvalDouble *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &zval_double__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   zval_string__init
+                     (ZvalString         *message)
+{
+  static const ZvalString init_value = ZVAL_STRING__INIT;
+  *message = init_value;
+}
+size_t zval_string__get_packed_size
+                     (const ZvalString *message)
+{
+  assert(message->base.descriptor == &zval_string__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t zval_string__pack
+                     (const ZvalString *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &zval_string__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t zval_string__pack_to_buffer
+                     (const ZvalString *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &zval_string__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+ZvalString *
+       zval_string__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (ZvalString *)
+     protobuf_c_message_unpack (&zval_string__descriptor,
+                                allocator, len, data);
+}
+void   zval_string__free_unpacked
+                     (ZvalString *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &zval_string__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   zval_array__init
+                     (ZvalArray         *message)
+{
+  static const ZvalArray init_value = ZVAL_ARRAY__INIT;
+  *message = init_value;
+}
+size_t zval_array__get_packed_size
+                     (const ZvalArray *message)
+{
+  assert(message->base.descriptor == &zval_array__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t zval_array__pack
+                     (const ZvalArray *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &zval_array__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t zval_array__pack_to_buffer
+                     (const ZvalArray *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &zval_array__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+ZvalArray *
+       zval_array__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (ZvalArray *)
+     protobuf_c_message_unpack (&zval_array__descriptor,
+                                allocator, len, data);
+}
+void   zval_array__free_unpacked
+                     (ZvalArray *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &zval_array__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   zval_object__init
+                     (ZvalObject         *message)
+{
+  static const ZvalObject init_value = ZVAL_OBJECT__INIT;
+  *message = init_value;
+}
+size_t zval_object__get_packed_size
+                     (const ZvalObject *message)
+{
+  assert(message->base.descriptor == &zval_object__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t zval_object__pack
+                     (const ZvalObject *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &zval_object__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t zval_object__pack_to_buffer
+                     (const ZvalObject *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &zval_object__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+ZvalObject *
+       zval_object__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (ZvalObject *)
+     protobuf_c_message_unpack (&zval_object__descriptor,
+                                allocator, len, data);
+}
+void   zval_object__free_unpacked
+                     (ZvalObject *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &zval_object__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   zval_bool__init
+                     (ZvalBool         *message)
+{
+  static const ZvalBool init_value = ZVAL_BOOL__INIT;
+  *message = init_value;
+}
+size_t zval_bool__get_packed_size
+                     (const ZvalBool *message)
+{
+  assert(message->base.descriptor == &zval_bool__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t zval_bool__pack
+                     (const ZvalBool *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &zval_bool__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t zval_bool__pack_to_buffer
+                     (const ZvalBool *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &zval_bool__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+ZvalBool *
+       zval_bool__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (ZvalBool *)
+     protobuf_c_message_unpack (&zval_bool__descriptor,
+                                allocator, len, data);
+}
+void   zval_bool__free_unpacked
+                     (ZvalBool *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &zval_bool__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   zval_resource__init
+                     (ZvalResource         *message)
+{
+  static const ZvalResource init_value = ZVAL_RESOURCE__INIT;
+  *message = init_value;
+}
+size_t zval_resource__get_packed_size
+                     (const ZvalResource *message)
+{
+  assert(message->base.descriptor == &zval_resource__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t zval_resource__pack
+                     (const ZvalResource *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &zval_resource__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t zval_resource__pack_to_buffer
+                     (const ZvalResource *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &zval_resource__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+ZvalResource *
+       zval_resource__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (ZvalResource *)
+     protobuf_c_message_unpack (&zval_resource__descriptor,
+                                allocator, len, data);
+}
+void   zval_resource__free_unpacked
+                     (ZvalResource *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &zval_resource__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   zval_const__init
+                     (ZvalConst         *message)
+{
+  static const ZvalConst init_value = ZVAL_CONST__INIT;
+  *message = init_value;
+}
+size_t zval_const__get_packed_size
+                     (const ZvalConst *message)
+{
+  assert(message->base.descriptor == &zval_const__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t zval_const__pack
+                     (const ZvalConst *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &zval_const__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t zval_const__pack_to_buffer
+                     (const ZvalConst *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &zval_const__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+ZvalConst *
+       zval_const__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (ZvalConst *)
+     protobuf_c_message_unpack (&zval_const__descriptor,
+                                allocator, len, data);
+}
+void   zval_const__free_unpacked
+                     (ZvalConst *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &zval_const__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   zval_const_ast__init
+                     (ZvalConstAst         *message)
+{
+  static const ZvalConstAst init_value = ZVAL_CONST_AST__INIT;
+  *message = init_value;
+}
+size_t zval_const_ast__get_packed_size
+                     (const ZvalConstAst *message)
+{
+  assert(message->base.descriptor == &zval_const_ast__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t zval_const_ast__pack
+                     (const ZvalConstAst *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &zval_const_ast__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t zval_const_ast__pack_to_buffer
+                     (const ZvalConstAst *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &zval_const_ast__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+ZvalConstAst *
+       zval_const_ast__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (ZvalConstAst *)
+     protobuf_c_message_unpack (&zval_const_ast__descriptor,
+                                allocator, len, data);
+}
+void   zval_const_ast__free_unpacked
+                     (ZvalConstAst *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &zval_const_ast__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   zval__init
+                     (Zval         *message)
+{
+  static const Zval init_value = ZVAL__INIT;
+  *message = init_value;
+}
+size_t zval__get_packed_size
+                     (const Zval *message)
+{
+  assert(message->base.descriptor == &zval__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t zval__pack
+                     (const Zval *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &zval__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t zval__pack_to_buffer
+                     (const Zval *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &zval__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+Zval *
+       zval__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (Zval *)
+     protobuf_c_message_unpack (&zval__descriptor,
+                                allocator, len, data);
+}
+void   zval__free_unpacked
+                     (Zval *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &zval__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   znode__init
+                     (Znode         *message)
+{
+  static const Znode init_value = ZNODE__INIT;
+  *message = init_value;
+}
+size_t znode__get_packed_size
+                     (const Znode *message)
+{
+  assert(message->base.descriptor == &znode__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t znode__pack
+                     (const Znode *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &znode__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t znode__pack_to_buffer
+                     (const Znode *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &znode__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+Znode *
+       znode__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (Znode *)
+     protobuf_c_message_unpack (&znode__descriptor,
+                                allocator, len, data);
+}
+void   znode__free_unpacked
+                     (Znode *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &znode__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
 void   opcode_list__init
                      (OpcodeList         *message)
 {
@@ -97,6 +637,505 @@ void   opcode__free_unpacked
   assert(message->base.descriptor == &opcode__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
+#define zval_null__field_descriptors NULL
+#define zval_null__field_indices_by_name NULL
+#define zval_null__number_ranges NULL
+const ProtobufCMessageDescriptor zval_null__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "ZvalNull",
+  "ZvalNull",
+  "ZvalNull",
+  "",
+  sizeof(ZvalNull),
+  0,
+  zval_null__field_descriptors,
+  zval_null__field_indices_by_name,
+  0,  zval_null__number_ranges,
+  (ProtobufCMessageInit) zval_null__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor zval_long__field_descriptors[1] =
+{
+  {
+    "lval",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_SINT64,
+    0,   /* quantifier_offset */
+    offsetof(ZvalLong, lval),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned zval_long__field_indices_by_name[] = {
+  0,   /* field[0] = lval */
+};
+static const ProtobufCIntRange zval_long__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor zval_long__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "ZvalLong",
+  "ZvalLong",
+  "ZvalLong",
+  "",
+  sizeof(ZvalLong),
+  1,
+  zval_long__field_descriptors,
+  zval_long__field_indices_by_name,
+  1,  zval_long__number_ranges,
+  (ProtobufCMessageInit) zval_long__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor zval_double__field_descriptors[1] =
+{
+  {
+    "dval",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_DOUBLE,
+    0,   /* quantifier_offset */
+    offsetof(ZvalDouble, dval),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned zval_double__field_indices_by_name[] = {
+  0,   /* field[0] = dval */
+};
+static const ProtobufCIntRange zval_double__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor zval_double__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "ZvalDouble",
+  "ZvalDouble",
+  "ZvalDouble",
+  "",
+  sizeof(ZvalDouble),
+  1,
+  zval_double__field_descriptors,
+  zval_double__field_indices_by_name,
+  1,  zval_double__number_ranges,
+  (ProtobufCMessageInit) zval_double__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor zval_string__field_descriptors[1] =
+{
+  {
+    "str",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(ZvalString, str),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned zval_string__field_indices_by_name[] = {
+  0,   /* field[0] = str */
+};
+static const ProtobufCIntRange zval_string__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor zval_string__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "ZvalString",
+  "ZvalString",
+  "ZvalString",
+  "",
+  sizeof(ZvalString),
+  1,
+  zval_string__field_descriptors,
+  zval_string__field_indices_by_name,
+  1,  zval_string__number_ranges,
+  (ProtobufCMessageInit) zval_string__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+#define zval_array__field_descriptors NULL
+#define zval_array__field_indices_by_name NULL
+#define zval_array__number_ranges NULL
+const ProtobufCMessageDescriptor zval_array__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "ZvalArray",
+  "ZvalArray",
+  "ZvalArray",
+  "",
+  sizeof(ZvalArray),
+  0,
+  zval_array__field_descriptors,
+  zval_array__field_indices_by_name,
+  0,  zval_array__number_ranges,
+  (ProtobufCMessageInit) zval_array__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+#define zval_object__field_descriptors NULL
+#define zval_object__field_indices_by_name NULL
+#define zval_object__number_ranges NULL
+const ProtobufCMessageDescriptor zval_object__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "ZvalObject",
+  "ZvalObject",
+  "ZvalObject",
+  "",
+  sizeof(ZvalObject),
+  0,
+  zval_object__field_descriptors,
+  zval_object__field_indices_by_name,
+  0,  zval_object__number_ranges,
+  (ProtobufCMessageInit) zval_object__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor zval_bool__field_descriptors[1] =
+{
+  {
+    "bval",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(ZvalBool, bval),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned zval_bool__field_indices_by_name[] = {
+  0,   /* field[0] = bval */
+};
+static const ProtobufCIntRange zval_bool__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor zval_bool__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "ZvalBool",
+  "ZvalBool",
+  "ZvalBool",
+  "",
+  sizeof(ZvalBool),
+  1,
+  zval_bool__field_descriptors,
+  zval_bool__field_indices_by_name,
+  1,  zval_bool__number_ranges,
+  (ProtobufCMessageInit) zval_bool__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+#define zval_resource__field_descriptors NULL
+#define zval_resource__field_indices_by_name NULL
+#define zval_resource__number_ranges NULL
+const ProtobufCMessageDescriptor zval_resource__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "ZvalResource",
+  "ZvalResource",
+  "ZvalResource",
+  "",
+  sizeof(ZvalResource),
+  0,
+  zval_resource__field_descriptors,
+  zval_resource__field_indices_by_name,
+  0,  zval_resource__number_ranges,
+  (ProtobufCMessageInit) zval_resource__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor zval_const__field_descriptors[1] =
+{
+  {
+    "str",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(ZvalConst, str),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned zval_const__field_indices_by_name[] = {
+  0,   /* field[0] = str */
+};
+static const ProtobufCIntRange zval_const__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor zval_const__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "ZvalConst",
+  "ZvalConst",
+  "ZvalConst",
+  "",
+  sizeof(ZvalConst),
+  1,
+  zval_const__field_descriptors,
+  zval_const__field_indices_by_name,
+  1,  zval_const__number_ranges,
+  (ProtobufCMessageInit) zval_const__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+#define zval_const_ast__field_descriptors NULL
+#define zval_const_ast__field_indices_by_name NULL
+#define zval_const_ast__number_ranges NULL
+const ProtobufCMessageDescriptor zval_const_ast__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "ZvalConstAst",
+  "ZvalConstAst",
+  "ZvalConstAst",
+  "",
+  sizeof(ZvalConstAst),
+  0,
+  zval_const_ast__field_descriptors,
+  zval_const_ast__field_indices_by_name,
+  0,  zval_const_ast__number_ranges,
+  (ProtobufCMessageInit) zval_const_ast__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor zval__field_descriptors[11] =
+{
+  {
+    "type",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_ENUM,
+    0,   /* quantifier_offset */
+    offsetof(Zval, type),
+    &zval_type__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "null",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(Zval, val_case),
+    offsetof(Zval, null),
+    &zval_null__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "long",
+    3,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(Zval, val_case),
+    offsetof(Zval, long_),
+    &zval_long__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "double",
+    4,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(Zval, val_case),
+    offsetof(Zval, double_),
+    &zval_double__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "string",
+    5,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(Zval, val_case),
+    offsetof(Zval, string),
+    &zval_string__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "array",
+    6,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(Zval, val_case),
+    offsetof(Zval, array),
+    &zval_array__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "object",
+    7,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(Zval, val_case),
+    offsetof(Zval, object),
+    &zval_object__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "bool",
+    8,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(Zval, val_case),
+    offsetof(Zval, bool_),
+    &zval_bool__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "resource",
+    9,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(Zval, val_case),
+    offsetof(Zval, resource),
+    &zval_resource__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "const",
+    10,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(Zval, val_case),
+    offsetof(Zval, const_),
+    &zval_const__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "constAst",
+    11,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(Zval, val_case),
+    offsetof(Zval, constast),
+    &zval_const_ast__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned zval__field_indices_by_name[] = {
+  5,   /* field[5] = array */
+  7,   /* field[7] = bool */
+  9,   /* field[9] = const */
+  10,   /* field[10] = constAst */
+  3,   /* field[3] = double */
+  2,   /* field[2] = long */
+  1,   /* field[1] = null */
+  6,   /* field[6] = object */
+  8,   /* field[8] = resource */
+  4,   /* field[4] = string */
+  0,   /* field[0] = type */
+};
+static const ProtobufCIntRange zval__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 11 }
+};
+const ProtobufCMessageDescriptor zval__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "Zval",
+  "Zval",
+  "Zval",
+  "",
+  sizeof(Zval),
+  11,
+  zval__field_descriptors,
+  zval__field_indices_by_name,
+  1,  zval__number_ranges,
+  (ProtobufCMessageInit) zval__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor znode__field_descriptors[2] =
+{
+  {
+    "type",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_ENUM,
+    0,   /* quantifier_offset */
+    offsetof(Znode, type),
+    &znode_type__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "zv",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    offsetof(Znode, zv),
+    &zval__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned znode__field_indices_by_name[] = {
+  0,   /* field[0] = type */
+  1,   /* field[1] = zv */
+};
+static const ProtobufCIntRange znode__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 2 }
+};
+const ProtobufCMessageDescriptor znode__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "Znode",
+  "Znode",
+  "Znode",
+  "",
+  sizeof(Znode),
+  2,
+  znode__field_descriptors,
+  znode__field_indices_by_name,
+  1,  znode__number_ranges,
+  (ProtobufCMessageInit) znode__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
 static const ProtobufCFieldDescriptor opcode_list__field_descriptors[1] =
 {
   {
@@ -135,7 +1174,7 @@ const ProtobufCMessageDescriptor opcode_list__descriptor =
   (ProtobufCMessageInit) opcode_list__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor opcode__field_descriptors[1] =
+static const ProtobufCFieldDescriptor opcode__field_descriptors[3] =
 {
   {
     "name",
@@ -149,14 +1188,40 @@ static const ProtobufCFieldDescriptor opcode__field_descriptors[1] =
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "op1",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    offsetof(Opcode, op1),
+    &znode__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "op2",
+    3,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    offsetof(Opcode, op2),
+    &znode__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned opcode__field_indices_by_name[] = {
   0,   /* field[0] = name */
+  1,   /* field[1] = op1 */
+  2,   /* field[2] = op2 */
 };
 static const ProtobufCIntRange opcode__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 1 }
+  { 0, 3 }
 };
 const ProtobufCMessageDescriptor opcode__descriptor =
 {
@@ -166,7 +1231,7 @@ const ProtobufCMessageDescriptor opcode__descriptor =
   "Opcode",
   "",
   sizeof(Opcode),
-  1,
+  3,
   opcode__field_descriptors,
   opcode__field_indices_by_name,
   1,  opcode__number_ranges,
@@ -495,5 +1560,91 @@ const ProtobufCEnumDescriptor opcode_name__descriptor =
   opcode_name__enum_values_by_name,
   4,
   opcode_name__value_ranges,
+  NULL,NULL,NULL,NULL   /* reserved[1234] */
+};
+static const ProtobufCEnumValue znode_type__enum_values_by_number[9] =
+{
+  { "IS_CONST", "ZNODE_TYPE__IS_CONST", 0 },
+  { "IS_TMP_VAR", "ZNODE_TYPE__IS_TMP_VAR", 1 },
+  { "IS_VAR", "ZNODE_TYPE__IS_VAR", 2 },
+  { "IS_UNUSED", "ZNODE_TYPE__IS_UNUSED", 3 },
+  { "IS_CV", "ZNODE_TYPE__IS_CV", 4 },
+  { "EXT_TYPE_UNUSED", "ZNODE_TYPE__EXT_TYPE_UNUSED", 5 },
+  { "IS_OPNUM", "ZNODE_TYPE__IS_OPNUM", 6 },
+  { "IS_OPLINE", "ZNODE_TYPE__IS_OPLINE", 7 },
+  { "IS_CLASS", "ZNODE_TYPE__IS_CLASS", 8 },
+};
+static const ProtobufCIntRange znode_type__value_ranges[] = {
+{0, 0},{0, 9}
+};
+static const ProtobufCEnumValueIndex znode_type__enum_values_by_name[9] =
+{
+  { "EXT_TYPE_UNUSED", 5 },
+  { "IS_CLASS", 8 },
+  { "IS_CONST", 0 },
+  { "IS_CV", 4 },
+  { "IS_OPLINE", 7 },
+  { "IS_OPNUM", 6 },
+  { "IS_TMP_VAR", 1 },
+  { "IS_UNUSED", 3 },
+  { "IS_VAR", 2 },
+};
+const ProtobufCEnumDescriptor znode_type__descriptor =
+{
+  PROTOBUF_C__ENUM_DESCRIPTOR_MAGIC,
+  "ZnodeType",
+  "ZnodeType",
+  "ZnodeType",
+  "",
+  9,
+  znode_type__enum_values_by_number,
+  9,
+  znode_type__enum_values_by_name,
+  1,
+  znode_type__value_ranges,
+  NULL,NULL,NULL,NULL   /* reserved[1234] */
+};
+static const ProtobufCEnumValue zval_type__enum_values_by_number[10] =
+{
+  { "IS_NULL", "ZVAL_TYPE__IS_NULL", 0 },
+  { "IS_LONG", "ZVAL_TYPE__IS_LONG", 1 },
+  { "IS_DOUBLE", "ZVAL_TYPE__IS_DOUBLE", 2 },
+  { "IS_STRING", "ZVAL_TYPE__IS_STRING", 3 },
+  { "IS_ARRAY", "ZVAL_TYPE__IS_ARRAY", 4 },
+  { "IS_OBJECT", "ZVAL_TYPE__IS_OBJECT", 5 },
+  { "IS_RESOURCE", "ZVAL_TYPE__IS_RESOURCE", 6 },
+  { "IS_CONSTANT", "ZVAL_TYPE__IS_CONSTANT", 7 },
+  { "IS_CONSTANT_AST", "ZVAL_TYPE__IS_CONSTANT_AST", 8 },
+  { "IS_BOOL", "ZVAL_TYPE__IS_BOOL", 9 },
+};
+static const ProtobufCIntRange zval_type__value_ranges[] = {
+{0, 0},{0, 10}
+};
+static const ProtobufCEnumValueIndex zval_type__enum_values_by_name[10] =
+{
+  { "IS_ARRAY", 4 },
+  { "IS_BOOL", 9 },
+  { "IS_CONSTANT", 7 },
+  { "IS_CONSTANT_AST", 8 },
+  { "IS_DOUBLE", 2 },
+  { "IS_LONG", 1 },
+  { "IS_NULL", 0 },
+  { "IS_OBJECT", 5 },
+  { "IS_RESOURCE", 6 },
+  { "IS_STRING", 3 },
+};
+const ProtobufCEnumDescriptor zval_type__descriptor =
+{
+  PROTOBUF_C__ENUM_DESCRIPTOR_MAGIC,
+  "ZvalType",
+  "ZvalType",
+  "ZvalType",
+  "",
+  10,
+  zval_type__enum_values_by_number,
+  10,
+  zval_type__enum_values_by_name,
+  1,
+  zval_type__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
