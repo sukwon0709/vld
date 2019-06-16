@@ -241,70 +241,137 @@ static const op_usage opcodes[] = {
 
 zend_brk_cont_element* vld_find_brk_cont(int nest_levels, int array_offset, zend_op_array *op_array);
 
-static inline int vld_dump_zval_null(ZVAL_VALUE_TYPE value)
+static inline int vld_dump_zval_null(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
 {
+	if (VLD_G(serialize)) {
+		zval_ptr->val_case = ZVAL__VAL_NULL;
+		zval_ptr->null = malloc(sizeof(ZvalNull));
+		zval_null__init(zval_ptr->null);
+	}	
 	return vld_printf (stderr, "null");
 }
 
-static inline int vld_dump_zval_long(ZVAL_VALUE_TYPE value)
+static inline int vld_dump_zval_long(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
 {
+	if (VLD_G(serialize)) {
+		zval_ptr->val_case = ZVAL__VAL_LONG;
+		zval_ptr->long_ = malloc(sizeof(ZvalLong));
+		zval_long__init(zval_ptr->long_);
+		zval_ptr->long_->lval = value.lval;
+	}	
 	return vld_printf (stderr, "%ld", value.lval);
 }
 
-static inline int vld_dump_zval_double(ZVAL_VALUE_TYPE value)
+static inline int vld_dump_zval_double(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
 {
+	if (VLD_G(serialize)) {
+		zval_ptr->val_case = ZVAL__VAL_DOUBLE;
+		zval_ptr->double_ = malloc(sizeof(ZvalDouble));
+		zval_double__init(zval_ptr->double_);
+		zval_ptr->double_->dval = value.dval;
+	}	
 	return vld_printf (stderr, "%g", value.dval);
 }
 
-static inline int vld_dump_zval_string(ZVAL_VALUE_TYPE value)
+static inline int vld_dump_zval_string(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
 {
 	ZVAL_VALUE_STRING_TYPE *new_str;
 	int new_len, len;
 
 	new_str = php_url_encode(ZVAL_STRING_VALUE(value), ZVAL_STRING_LEN(value) PHP_URLENCODE_NEW_LEN(new_len));
 	len = vld_printf (stderr, "'%s'", ZSTRING_VALUE(new_str));
+	if (VLD_G(serialize)) {
+		zval_ptr->val_case = ZVAL__VAL_STRING;
+		zval_ptr->string = malloc(sizeof(ZvalString));
+		zval_string__init(zval_ptr->string);
+		zval_ptr->string->str = strdup(new_str);
+	}	
 	efree(new_str);
 	return len;
 }
 
-static inline int vld_dump_zval_array(ZVAL_VALUE_TYPE value)
+static inline int vld_dump_zval_array(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
 {
+	if (VLD_G(serialize)) {
+		zval_ptr->val_case = ZVAL__VAL_ARRAY;
+		zval_ptr->array = malloc(sizeof(ZvalArray));
+		zval_array__init(zval_ptr->array);
+	}
 	return vld_printf (stderr, "<array>");
 }
 
-static inline int vld_dump_zval_object(ZVAL_VALUE_TYPE value)
+static inline int vld_dump_zval_object(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
 {
+	if (VLD_G(serialize)) {
+		zval_ptr->val_case = ZVAL__VAL_OBJECT;
+		zval_ptr->object = malloc(sizeof(ZvalObject));
+		zval_object__init(zval_ptr->object);
+	}
 	return vld_printf (stderr, "<object>");
 }
 
-static inline int vld_dump_zval_bool(ZVAL_VALUE_TYPE value)
+static inline int vld_dump_zval_bool(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
 {
+	if (VLD_G(serialize)) {
+		zval_ptr->val_case = ZVAL__VAL_BOOL;
+		zval_ptr->bool_ = malloc(sizeof(ZvalBool));
+		zval_bool__init(zval_ptr->bool_);
+		zval_ptr->bool_->bval = value.lval;
+	}
 	return vld_printf (stderr, "<bool>");
 }
 
-static inline int vld_dump_zval_true(ZVAL_VALUE_TYPE value)
+static inline int vld_dump_zval_true(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
 {
+	if (VLD_G(serialize)) {
+		zval_ptr->val_case = ZVAL__VAL_BOOL;
+		zval_ptr->bool_ = malloc(sizeof(ZvalBool));
+		zval_bool__init(zval_ptr->bool_);
+		zval_ptr->bool_->bval = 1;
+	}
 	return vld_printf (stderr, "<true>");
 }
 
-static inline int vld_dump_zval_false(ZVAL_VALUE_TYPE value)
+static inline int vld_dump_zval_false(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
 {
+	if (VLD_G(serialize)) {
+		zval_ptr->val_case = ZVAL__VAL_BOOL;
+		zval_ptr->bool_ = malloc(sizeof(ZvalBool));
+		zval_bool__init(zval_ptr->bool_);
+		zval_ptr->bool_->bval = 0;
+	}
 	return vld_printf (stderr, "<false>");
 }
 
-static inline int vld_dump_zval_resource(ZVAL_VALUE_TYPE value)
+static inline int vld_dump_zval_resource(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
 {
+	if (VLD_G(serialize)) {
+		zval_ptr->val_case = ZVAL__VAL_RESOURCE;
+		zval_ptr->resource = malloc(sizeof(ZvalResource));
+		zval_resource__init(zval_ptr->resource);
+	}
 	return vld_printf (stderr, "<resource>");
 }
 
-static inline int vld_dump_zval_constant(ZVAL_VALUE_TYPE value)
+static inline int vld_dump_zval_constant(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
 {
+	if (VLD_G(serialize)) {
+		zval_ptr->val_case = ZVAL__VAL_CONST;
+		zval_ptr->const_ = malloc(sizeof(ZvalConst));
+		zval_const__init(zval_ptr->const_);
+		zval_ptr->const_->str = strdup(ZVAL_STRING_VALUE(value));
+	}
 	return vld_printf (stderr, "<const:'%s'>", ZVAL_STRING_VALUE(value));
 }
 
 #if PHP_VERSION_ID >= 50600
-static inline int vld_dump_zval_constant_ast(ZVAL_VALUE_TYPE value)
+static inline int vld_dump_zval_constant_ast(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
 {
+	if (VLD_G(serialize)) {
+		zval_ptr->val_case = ZVAL__VAL_CONST_AST;
+		zval_ptr->constast = malloc(sizeof(ZvalConstAst));
+		zval_const_ast__init(zval_ptr->constast);
+	}
 	return vld_printf (stderr, "<const ast>");
 }
 #else
@@ -315,23 +382,23 @@ static inline int vld_dump_zval_constant_array(ZVAL_VALUE_TYPE value)
 #endif
 
 
-int vld_dump_zval (zval val)
+int vld_dump_zval (zval val, Zval *val_ptr)
 {
 #if PHP_VERSION_ID >= 70000
 	switch (val.u1.v.type) {
 #else
 	switch (val.type) {
 #endif
-		case IS_NULL:           return vld_dump_zval_null (val.value);
-		case IS_LONG:           return vld_dump_zval_long (val.value);
-		case IS_DOUBLE:         return vld_dump_zval_double (val.value);
-		case IS_STRING:         return vld_dump_zval_string (val.value);
-		case IS_ARRAY:          return vld_dump_zval_array (val.value);
-		case IS_OBJECT:         return vld_dump_zval_object (val.value);
-		case IS_RESOURCE:       return vld_dump_zval_resource (val.value);
-		case IS_CONSTANT:       return vld_dump_zval_constant (val.value);
+		case IS_NULL:           return vld_dump_zval_null (val.value, val_ptr);
+		case IS_LONG:           return vld_dump_zval_long (val.value, val_ptr);
+		case IS_DOUBLE:         return vld_dump_zval_double (val.value, val_ptr);
+		case IS_STRING:         return vld_dump_zval_string (val.value, val_ptr);
+		case IS_ARRAY:          return vld_dump_zval_array (val.value, val_ptr);
+		case IS_OBJECT:         return vld_dump_zval_object (val.value, val_ptr);
+		case IS_RESOURCE:       return vld_dump_zval_resource (val.value, val_ptr);
+		case IS_CONSTANT:       return vld_dump_zval_constant (val.value, val_ptr);
 #if PHP_VERSION_ID >= 50600
-		case IS_CONSTANT_AST:   return vld_dump_zval_constant_ast (val.value);
+		case IS_CONSTANT_AST:   return vld_dump_zval_constant_ast (val.value, val_ptr);
 #else
 		case IS_CONSTANT_ARRAY: return vld_dump_zval_constant_array (val.value);
 #endif
@@ -344,7 +411,7 @@ int vld_dump_zval (zval val)
 		case IS_INDIRECT:       return vld_dump_zval_indirect (val.value);
 		case IS_PTR:            return vld_dump_zval_ptr (val.value);
 #else
-		case IS_BOOL:           return vld_dump_zval_bool (val.value);
+		case IS_BOOL:           return vld_dump_zval_bool (val.value, val_ptr);
 #endif
 	}
 	return vld_printf(stderr, "<unknown>");
@@ -375,12 +442,33 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 			VLD_PRINT1(3, " IS_CONST (%d) ", VLD_ZNODE_ELEM(node, var) / sizeof(temp_variable));
 #endif			
 #if PHP_VERSION_ID >= 70000
-			vld_dump_zval(*node.zv);
+			if (VLD_G(serialize)) {
+				Zval zval = ZVAL__INIT;				
+				vld_dump_zval(*node.zv, &zval);
+				znode_ptr->zv = malloc(sizeof(Zval));
+				*znode_ptr->zv = zval;
+			} else {
+				vld_dump_zval(*node.zv, NULL);
+			}
 #else
 # if PHP_VERSION_ID >= 50399
-			vld_dump_zval(*node.zv);
+			if (VLD_G(serialize)) {
+				Zval zval = ZVAL__INIT;				
+				vld_dump_zval(*node.zv, &zval);
+				znode_ptr->zv = malloc(sizeof(Zval));
+				*znode_ptr->zv = zval;
+			} else {
+				vld_dump_zval(*node.zv, NULL);
+			}
 # else
-			vld_dump_zval(node.u.constant);
+			if (VLD_G(serialize)) {
+				Zval zval = ZVAL__INIT;				
+				vld_dump_zval(node.u.constant, &zval);
+				znode_ptr->zv = malloc(sizeof(Zval));
+				*znode_ptr->zv = zval;
+			} else {
+				vld_dump_zval(node.u.constant, NULL);
+			}
 # endif
 #endif
 			if (VLD_G(serialize)) {
