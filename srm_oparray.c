@@ -904,10 +904,12 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 
 	OpcodeList *opcodeList = NULL;
 	Opcode **opcodes = NULL;
-	if (VLD_G(serialize)) {		
+	if (VLD_G(serialize)) {
 		VLD_G(opcode_dump)->opcodes[VLD_G(opcode_dump)->n_opcodes] = malloc(sizeof(OpcodeList));
 		opcode_list__init(VLD_G(opcode_dump)->opcodes[VLD_G(opcode_dump)->n_opcodes]);
 		opcodeList = VLD_G(opcode_dump)->opcodes[VLD_G(opcode_dump)->n_opcodes];
+		opcodeList->branch_info = malloc(sizeof(BranchInfo));
+		branch_info__init(opcodeList->branch_info);
 		opcodes = malloc(sizeof(Opcode*) * opa->last);
 		for (int i = 0; i < opa->last; i++) {
 			opcodes[i] = malloc(sizeof(Opcode));
@@ -975,7 +977,33 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		vld_branch_info_dump(opa, branch_info TSRMLS_CC);
 	}
 
-	if (VLD_G(serialize)) {		
+	if (VLD_G(serialize)) {
+		// analyze branch info
+		int num_branches = 0;
+		for (int i = 0; i < branch_info->starts->size; i++) {
+			if (vld_set_in(branch_info->starts, i)) num_branches++;
+		}
+		Branch **branches = malloc(sizeof(Branch*) * num_branches);
+		int cur_branch_idx = 0;
+		for (int i = 0; i < branch_info->starts->size; i++) {
+			if (vld_set_in(branch_info->starts, i)) {
+				branches[cur_branch_idx] = malloc(sizeof(Branch));
+				branch__init(branches[cur_branch_idx]);
+				branches[cur_branch_idx]->start_lineno = branch_info->branches[i].start_lineno;
+				branches[cur_branch_idx]->end_lineno = branch_info->branches[i].end_lineno;
+				branches[cur_branch_idx]->start_op = i;
+				branches[cur_branch_idx]->end_op = branch_info->branches[i].end_op;
+				if (branch_info->branches[i].out[0]) {
+					branches[cur_branch_idx]->out_op1 = branch_info->branches[i].out[0];
+				}
+				if (branch_info->branches[i].out[1]) {
+					branches[cur_branch_idx]->out_op2 = branch_info->branches[i].out[1];
+				}
+				cur_branch_idx += 1;
+			}
+		}
+		opcodeList->branch_info->n_branches = num_branches;
+		opcodeList->branch_info->branches = branches;
 		opcodeList->n_codes = opa->last;
 		opcodeList->codes = opcodes;		
 		VLD_G(opcode_dump)->n_opcodes += 1;		// move to next opcode list.
