@@ -20,7 +20,7 @@
 #include "ext/standard/url.h"
 #include "set.h"
 #include "php_vld.h"
-#include "php_opcode.pb-c.h"
+#include "dependencies/uc-php-proto/php_opcode.pb-c.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(vld)
 
