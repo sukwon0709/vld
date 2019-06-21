@@ -912,6 +912,9 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 			opcodes[i] = malloc(sizeof(Opcode));
 			opcode__init(opcodes[i]);
 		}
+
+		opcodeList->filename = strdup(ZSTRING_VALUE(opa->filename));
+		opcodeList->function_name = opa->function_name ? strdup(ZSTRING_VALUE(opa->function_name)) : "__main";
 	}
 
 	if (VLD_G(dump_paths)) {
@@ -927,6 +930,18 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		vld_printf (stderr, "number of ops:  %d\n", opa->last);
 	}
 #ifdef IS_CV /* PHP >= 5.1 */
+	CV **cvs = NULL;
+	if (VLD_G(serialize)) {
+		cvs = malloc(sizeof(CV*) * opa->last_var);
+		for (i = 0; i < opa->last_var; i++) {
+			cvs[i] = malloc(sizeof(CV));
+			cv__init(cvs[i]);
+			cvs[i]->cv_id = i;
+			cvs[i]->cv_name = strdup(OPARRAY_VAR_NAME(opa->vars[i]));
+		}
+		opcodeList->n_cvs = opa->last_var;
+		opcodeList->cvs = cvs;
+	}
 	vld_printf (stderr, "compiled vars:  ");
 	for (i = 0; i < opa->last_var; i++) {
 		vld_printf (stderr, "!%d = $%s%s", i, OPARRAY_VAR_NAME(opa->vars[i]), ((i + 1) == opa->last_var) ? "\n" : ", ");
@@ -944,6 +959,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	for (i = 0; i < opa->last; i++) {
 		if (VLD_G(serialize)) {
 			Opcode opcode = OPCODE__INIT;
+			opcode.opcode_id = i;
 			vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i), vld_set_in(branch_info->entry_points, i), vld_set_in(branch_info->starts, i), vld_set_in(branch_info->ends, i), &opcode, opa TSRMLS_CC);
 			*opcodes[i] = opcode;
 		} else {
@@ -971,6 +987,12 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 			free(opcodes[i]);
 		}
 		free(opcodes);
+#if IS_CV
+		for (int i = 0; i < opa->last_var; i++) {
+			free(cvs[i]);
+		}
+		free(cvs);
+#endif		
 		free(opcodeList);
 	}
 
