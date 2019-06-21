@@ -104,6 +104,7 @@ static void vld_init_globals(zend_vld_globals *vld_globals)
 	vld_globals->verbosity    = 1;
 	vld_globals->serialize    = 0;
 	vld_globals->serialize_file = NULL;
+	vld_globals->opcode_dump = NULL;
 }
 
 
@@ -176,13 +177,18 @@ PHP_RINIT_FUNCTION(vld)
 	}
 
 	if (VLD_G(serialize)) {
-		char *filename;
+		// initializes OpcodeDump
+		VLD_G(opcode_dump) = malloc(sizeof(OpcodeDump));
+		opcode_dump__init(VLD_G(opcode_dump));
+		VLD_G(opcode_dump)->opcodes = malloc(sizeof(OpcodeList*) * 100);	// allows max 100 opcode dumps per file.
+		VLD_G(opcode_dump)->n_opcodes = 0;
 
+		// initializes serialization file
+		char *filename;
 		filename = malloc(strlen("opcodes.dump") + strlen(VLD_G(serialize_dir)) + 2);
 		sprintf(filename, "%s/%s", VLD_G(serialize_dir), "opcodes.dump");
-
 		VLD_G(serialize_file) = fopen(filename, "w");
-		free(filename);		
+		free(filename);
 	}
 	return SUCCESS;
 }
@@ -201,11 +207,22 @@ PHP_RSHUTDOWN_FUNCTION(vld)
 	if (VLD_G(path_dump_file)) {
 		fprintf(VLD_G(path_dump_file), "}\n");
 		fclose(VLD_G(path_dump_file));
-	}
+	}	
 
 	if (VLD_G(serialize_file)) {
+		assert(VLD_G(opcode_dump));
+
+		// writes all opcode dumps to a file
+		unsigned len = opcode_dump__get_packed_size(VLD_G(opcode_dump));
+		void *buf = malloc(len);
+		opcode_dump__pack(VLD_G(opcode_dump), buf);
+		fprintf(stderr, "Writing %d serialized bytes\n", len);
+		fwrite(buf, len, 1, VLD_G(serialize_file));
+		free(buf);		
 		fclose(VLD_G(serialize_file));
-	}
+
+		VLD_G(opcode_dump) = NULL;
+	}	
 
 	return SUCCESS;
 }

@@ -904,9 +904,10 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 
 	OpcodeList *opcodeList = NULL;
 	Opcode **opcodes = NULL;
-	if (VLD_G(serialize)) {
-		opcodeList = malloc(sizeof(OpcodeList));
-		opcode_list__init(opcodeList);
+	if (VLD_G(serialize)) {		
+		VLD_G(opcode_dump)->opcodes[VLD_G(opcode_dump)->n_opcodes] = malloc(sizeof(OpcodeList));
+		opcode_list__init(VLD_G(opcode_dump)->opcodes[VLD_G(opcode_dump)->n_opcodes]);
+		opcodeList = VLD_G(opcode_dump)->opcodes[VLD_G(opcode_dump)->n_opcodes];
 		opcodes = malloc(sizeof(Opcode*) * opa->last);
 		for (int i = 0; i < opa->last; i++) {
 			opcodes[i] = malloc(sizeof(Opcode));
@@ -976,24 +977,8 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 
 	if (VLD_G(serialize)) {		
 		opcodeList->n_codes = opa->last;
-		opcodeList->codes = opcodes;
-		unsigned len = opcode_list__get_packed_size(opcodeList);
-		void *buf = malloc(len);
-		opcode_list__pack(opcodeList, buf);
-		fprintf(stderr, "Writing %d serialized bytes\n", len);
-		fwrite(buf, len, 1, VLD_G(serialize_file));
-		free(buf);
-		for (int i = 0; i < opa->last; i++) {
-			free(opcodes[i]);
-		}
-		free(opcodes);
-#if IS_CV
-		for (int i = 0; i < opa->last_var; i++) {
-			free(cvs[i]);
-		}
-		free(cvs);
-#endif		
-		free(opcodeList);
+		opcodeList->codes = opcodes;		
+		VLD_G(opcode_dump)->n_opcodes += 1;		// move to next opcode list.
 	}
 
 	vld_set_free(set);

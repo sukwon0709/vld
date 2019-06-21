@@ -15,6 +15,7 @@
 #define PHP_VLD_H
 
 #include "php.h"
+#include "dependencies/uc-php-proto/php_opcode.pb-c.h"
 
 extern zend_module_entry vld_module_entry;
 #define phpext_vld_ptr &vld_module_entry
@@ -50,6 +51,7 @@ ZEND_BEGIN_MODULE_GLOBALS(vld)
 	int serialize;
 	char *serialize_dir;
 	FILE *serialize_file;
+	OpcodeDump *opcode_dump;
 ZEND_END_MODULE_GLOBALS(vld) 
 
 int vld_printf(FILE *stream, const char* fmt, ...);
