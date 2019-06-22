@@ -979,6 +979,19 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 
 	if (VLD_G(serialize)) {
 		// analyze branch info
+		int num_entry_points = 0;
+		for (int i = 0; i < branch_info->starts->size; i++) {
+			if (vld_set_in(branch_info->entry_points, i)) num_entry_points++;
+		}
+		int **entry_points = malloc(sizeof(int*) * num_entry_points);
+		int cur_entry_point_idx = 0;
+		for (int i = 0; i < branch_info->starts->size; i++) {
+			if (vld_set_in(branch_info->entry_points, i)) {
+				entry_points[cur_entry_point_idx] = malloc(sizeof(int));
+				entry_points[cur_entry_point_idx] = i;
+				cur_entry_point_idx++;
+			}
+		}
 		int num_branches = 0;
 		for (int i = 0; i < branch_info->starts->size; i++) {
 			if (vld_set_in(branch_info->starts, i)) num_branches++;
@@ -1002,6 +1015,8 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 				cur_branch_idx += 1;
 			}
 		}
+		opcodeList->branch_info->n_entry_points = num_entry_points;
+		opcodeList->branch_info->entry_points = entry_points;
 		opcodeList->branch_info->n_branches = num_branches;
 		opcodeList->branch_info->branches = branches;
 		opcodeList->n_codes = opa->last;
