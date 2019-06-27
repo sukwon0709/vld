@@ -51,6 +51,9 @@ void vld_branch_info_free(vld_branch_info *branch_info)
 	free(branch_info);
 }
 
+/**
+ * Records branch's jump opcode and destination.
+ */
 void vld_branch_info_update(vld_branch_info *branch_info, unsigned int pos, unsigned int lineno, unsigned int outidx, unsigned int jump_pos)
 {
 	vld_set_add(branch_info->ends, pos);

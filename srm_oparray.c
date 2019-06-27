@@ -1044,6 +1044,12 @@ zend_brk_cont_element* vld_find_brk_cont(int nest_levels, int array_offset, zend
 	return jmp_to;
 }
 
+/**
+ * Determines jump destinations if the current opcode is a jump.
+ * position - current opcode pos in op_array
+ * jmp 1 - jump destination 1
+ * jmp 2 - jump destination 2
+ */
 int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *jmp2)
 {
 	zend_op *base_address = &(opa->opcodes[0]);
@@ -1129,6 +1135,22 @@ int vld_find_jump(zend_op_array *opa, unsigned int position, long *jmp1, long *j
 	return 0;
 }
 
+/**
+ *  Separates out interprocedural nodes (including other files or calling functions) such that it is easier to replace them with ICFG edges.
+ */
+void vld_separate_include_or_calls(zend_op_array *opa, unsigned int position, vld_set *set, vld_branch_info *branch_info TSRMLS_DC)
+{
+	int separable_opcodes[] = {ZEND_INCLUDE_OR_EVAL, ZEND_DO_FCALL, ZEND_DO_FCALL_BY_NAME};	
+	for (int i = 0; i < sizeof(separable_opcodes)/sizeof(separable_opcodes[0]); i++)
+	{
+		if ((opa->opcodes[position + 1].opcode == separable_opcodes[i]) || (opa->opcodes[position].opcode == separable_opcodes[i]))
+		{
+			vld_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 0, position + 1);
+			vld_analyse_branch(opa, position + 1, set, branch_info TSRMLS_CC);
+		}
+	}
+}
+
 void vld_analyse_oparray(zend_op_array *opa, vld_set *set, vld_branch_info *branch_info TSRMLS_DC)
 {
 	unsigned int position = 0;
@@ -1202,6 +1224,10 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 			}
 			break;
 		}
+
+		// XXX(soh): separate out interprocedural nodes from rest of the CFG nodes.
+		vld_separate_include_or_calls(opa, position, set, branch_info TSRMLS_CC);
+		
 #ifdef ZEND_ENGINE_2
 		/* See if we have a throw instruction */
 		if (opa->opcodes[position].opcode == ZEND_THROW) {
