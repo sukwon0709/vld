@@ -917,6 +917,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		}
 
 		opcodeList->filename = strdup(ZSTRING_VALUE(opa->filename));
+		opcodeList->scope_name = opa->scope ? strdup(opa->scope->name) : "::";
 		opcodeList->function_name = opa->function_name ? strdup(ZSTRING_VALUE(opa->function_name)) : "__main";
 	}
 
