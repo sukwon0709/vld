@@ -52,7 +52,9 @@ void vld_branch_info_free(vld_branch_info *branch_info)
 }
 
 /**
- * Records branch's jump opcode and destination.
+ * Records where jump to next branch happens.
+ * - Adds pos to branch_info->ends
+ * - Updates branches[pos].out and branches[pos].start_lineno
  */
 void vld_branch_info_update(vld_branch_info *branch_info, unsigned int pos, unsigned int lineno, unsigned int outidx, unsigned int jump_pos)
 {
@@ -84,7 +86,7 @@ void vld_only_leave_first_catch(zend_op_array *opa, vld_branch_info *branch_info
 	vld_set_remove(branch_info->entry_points, position);
 }
 
-void vld_branch_post_process(zend_op_array *opa, vld_branch_info *branch_info)
+void vld_branch_post_process(zend_op_array *opa, vld_set *set, vld_branch_info *branch_info)
 {
 	unsigned int i;
 	int in_branch = 0, last_start = VLD_JMP_NOT_SET;
@@ -108,10 +110,13 @@ void vld_branch_post_process(zend_op_array *opa, vld_branch_info *branch_info)
 			in_branch = 1;
 		}
 		if (vld_set_in(branch_info->ends, i)) {
-			branch_info->branches[last_start].out[0] = branch_info->branches[i].out[0];
-			branch_info->branches[last_start].out[1] = branch_info->branches[i].out[1];
-			branch_info->branches[last_start].end_op = i;
-			branch_info->branches[last_start].end_lineno = branch_info->branches[i].start_lineno;
+			if (vld_set_in(set, i)) {
+				// do not take dead opcode's branch
+				branch_info->branches[last_start].out[0] = branch_info->branches[i].out[0];			// may override jump dest with dead code's
+				branch_info->branches[last_start].out[1] = branch_info->branches[i].out[1];
+				branch_info->branches[last_start].end_op = i;
+				branch_info->branches[last_start].end_lineno = branch_info->branches[i].start_lineno;
+			}			
 			in_branch = 0;
 		}
 	}

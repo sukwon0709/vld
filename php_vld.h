@@ -64,6 +64,7 @@ int vld_printf(FILE *stream, const char* fmt, ...);
 #define VLD_PRINT(v,args) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args); }
 #define VLD_PRINT1(v,args,x) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args, (x)); }
 #define VLD_PRINT2(v,args,x,y) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args, (x), (y)); }
+#define VLD_PRINT3(v,args,x,y,z) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args, (x), (y), (z)); }
 
 #if PHP_VERSION_ID >= 70000
 # define ZHASHKEYSTR(k) ((k)->key->val)

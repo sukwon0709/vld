@@ -36,8 +36,8 @@ typedef struct _vld_path {
 typedef struct _vld_branch_info {
 	unsigned int  size;
 	vld_set      *entry_points;
-	vld_set      *starts;			// start of a basic block
-	vld_set      *ends;				// end of a basic block
+	vld_set      *starts;			// start of a branch (endpoint of a jump)
+	vld_set      *ends;				// location where jump is initiated (exit point out of a branch)
 	vld_branch   *branches;
 
 	unsigned int  paths_count;
@@ -48,7 +48,7 @@ typedef struct _vld_branch_info {
 vld_branch_info *vld_branch_info_create(unsigned int size);
 
 void vld_branch_info_update(vld_branch_info *branch_info, unsigned int pos, unsigned int lineno, unsigned int outidx, unsigned int jump_pos);
-void vld_branch_post_process(zend_op_array *opa, vld_branch_info *branch_info);
+void vld_branch_post_process(zend_op_array *opa, vld_set *set, vld_branch_info *branch_info);
 void vld_branch_find_paths(vld_branch_info *branch_info);
 
 void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info TSRMLS_DC);

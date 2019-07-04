@@ -894,24 +894,36 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 
 void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 {
-	unsigned int i;
+	unsigned int i,j;
 	vld_set *set;
 	vld_branch_info *branch_info;
 	unsigned int base_address = (unsigned int)(zend_intptr_t)&(opa->opcodes[0]);
+	unsigned int num_executable_opcodes = 0;
 
 	set = vld_set_create(opa->last);
 	branch_info = vld_branch_info_create(opa->last);
 
 	OpcodeList *opcodeList = NULL;
 	Opcode **opcodes = NULL;
+
+	if (VLD_G(dump_paths)) {
+		vld_analyse_oparray(opa, set, branch_info TSRMLS_CC);
+		for (int i = 0; i < opa->last; i++) {
+			if (vld_set_in(set, i)) {
+				num_executable_opcodes += 1;
+			}
+		}
+		num_executable_opcodes = opa->last;
+	}
+
 	if (VLD_G(serialize)) {
 		VLD_G(opcode_dump)->opcodes[VLD_G(opcode_dump)->n_opcodes] = malloc(sizeof(OpcodeList));
 		opcode_list__init(VLD_G(opcode_dump)->opcodes[VLD_G(opcode_dump)->n_opcodes]);
 		opcodeList = VLD_G(opcode_dump)->opcodes[VLD_G(opcode_dump)->n_opcodes];
 		opcodeList->branch_info = malloc(sizeof(BranchInfo));
 		branch_info__init(opcodeList->branch_info);
-		opcodes = malloc(sizeof(Opcode*) * opa->last);
-		for (int i = 0; i < opa->last; i++) {
+		opcodes = malloc(sizeof(Opcode*) * num_executable_opcodes);
+		for (int i = 0; i < num_executable_opcodes; i++) {
 			opcodes[i] = malloc(sizeof(Opcode));
 			opcode__init(opcodes[i]);
 		}
@@ -921,9 +933,6 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		opcodeList->function_name = opa->function_name ? strdup(ZSTRING_VALUE(opa->function_name)) : "__main";
 	}
 
-	if (VLD_G(dump_paths)) {
-		vld_analyse_oparray(opa, set, branch_info TSRMLS_CC);
-	}
 	if (VLD_G(format)) {
 		vld_printf (stderr, "filename:%s%s\n", VLD_G(col_sep), ZSTRING_VALUE(opa->filename));
 		vld_printf (stderr, "function name:%s%s\n", VLD_G(col_sep), ZSTRING_VALUE(opa->function_name));
@@ -960,11 +969,11 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		vld_printf(stderr, "line     #* E I O op                           fetch          ext  return  operands\n");
 		vld_printf(stderr, "-------------------------------------------------------------------------------------\n");
 	}
-	for (i = 0; i < opa->last; i++) {
+	for (i = 0, j=0; i < opa->last; i++) {
 		if (VLD_G(serialize)) {
 			Opcode opcode = OPCODE__INIT;
-			opcode.opcode_id = i;
 			vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i), vld_set_in(branch_info->entry_points, i), vld_set_in(branch_info->starts, i), vld_set_in(branch_info->ends, i), &opcode, opa TSRMLS_CC);
+			opcode.opcode_id = i;
 			*opcodes[i] = opcode;
 		} else {
 			vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i), vld_set_in(branch_info->entry_points, i), vld_set_in(branch_info->starts, i), vld_set_in(branch_info->ends, i), NULL, opa TSRMLS_CC);
@@ -973,7 +982,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	vld_printf(stderr, "\n");
 
 	if (VLD_G(dump_paths)) {
-		vld_branch_post_process(opa, branch_info);
+		vld_branch_post_process(opa, set, branch_info);
 		vld_branch_find_paths(branch_info);
 		vld_branch_info_dump(opa, branch_info TSRMLS_CC);
 	}
@@ -1020,7 +1029,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		opcodeList->branch_info->entry_points = entry_points;
 		opcodeList->branch_info->n_branches = num_branches;
 		opcodeList->branch_info->branches = branches;
-		opcodeList->n_codes = opa->last;
+		opcodeList->n_codes = num_executable_opcodes;
 		opcodeList->codes = opcodes;		
 		VLD_G(opcode_dump)->n_opcodes += 1;		// move to next opcode list.
 	}
@@ -1152,6 +1161,9 @@ void vld_separate_include_or_calls(zend_op_array *opa, unsigned int position, vl
 	}
 }
 
+/**
+ * Computes branch informations.
+ */
 void vld_analyse_oparray(zend_op_array *opa, vld_set *set, vld_branch_info *branch_info TSRMLS_DC)
 {
 	unsigned int position = 0;
@@ -1160,7 +1172,7 @@ void vld_analyse_oparray(zend_op_array *opa, vld_set *set, vld_branch_info *bran
 	while (position < opa->last) {
 		if (position == 0) {
 			vld_analyse_branch(opa, position, set, branch_info TSRMLS_CC);
-			vld_set_add(branch_info->entry_points, position);
+			vld_set_add(branch_info->entry_points, position);		// first opcode is always an entry point
 #if PHP_MAJOR_VERSION >= 5
 		} else if (opa->opcodes[position].opcode == ZEND_CATCH) {
 			if (VLD_G(format)) {
@@ -1174,10 +1186,17 @@ void vld_analyse_oparray(zend_op_array *opa, vld_set *set, vld_branch_info *bran
 		}
 		position++;
 	}
-	vld_set_add(branch_info->ends, opa->last-1);
+	vld_set_add(branch_info->ends, opa->last-1);		// last opcode is always a jump?
 	branch_info->branches[opa->last-1].start_lineno = opa->opcodes[opa->last-1].lineno;
 }
 
+/**
+ * Populates branch_info struct from looking at opcodes.
+ * opa - opcode array.
+ * position - start of a new branch.
+ * set - analyzed opcodes.
+ * branch_info - should be updated branch information.
+ */
 void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set, vld_branch_info *branch_info TSRMLS_DC)
 {
 	long jump_pos1 = VLD_JMP_NOT_SET;
@@ -1189,7 +1208,7 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 		VLD_PRINT1(1, "Branch analysis from position: %d\n", position);
 	}
 
-	vld_set_add(branch_info->starts, position);
+	vld_set_add(branch_info->starts, position);		// records the start of the current branch.
 	branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
 
 	/* First we see if the branch has been visited, if so we bail out. */
@@ -1212,6 +1231,7 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 				VLD_PRINT(1, "\n");
 			}
 			if (jump_pos1 == VLD_JMP_EXIT || jump_pos1 >= 0) {
+				VLD_PRINT3(1, "vld_branch_info_update called: pos = %d, lineno = %d, jump_pos1 = %d\n", position, opa->opcodes[position].lineno, jump_pos1);
 				vld_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 0, jump_pos1);
 				if (jump_pos1 != VLD_JMP_EXIT) {
 					vld_analyse_branch(opa, jump_pos1, set, branch_info TSRMLS_CC);
@@ -1223,6 +1243,7 @@ void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set,
 					vld_analyse_branch(opa, jump_pos2, set, branch_info TSRMLS_CC);
 				}
 			}
+			// Differentiate RETURN opcodes here or identifying method ends?
 			break;
 		}
 
