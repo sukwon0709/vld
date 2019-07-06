@@ -40,9 +40,11 @@ static zend_op_array* vld_compile_string(zval *source_string, char *filename TSR
 #if PHP_VERSION_ID >= 50500
 static void (*old_execute_ex)(zend_execute_data *execute_data TSRMLS_DC);
 static void vld_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
+static void vld_execute2_ex(zend_execute_data *execute_data TSRMLS_DC);
 #else
 static void (*old_execute)(zend_op_array *op_array TSRMLS_DC);
 static void vld_execute(zend_op_array *op_array TSRMLS_DC);
+static void vld_execute2(zend_op_array *op_array TSRMLS_DC);
 #endif
 
 
@@ -160,6 +162,14 @@ PHP_RINIT_FUNCTION(vld)
 #else
 			zend_execute = vld_execute;
 #endif
+		} else {
+			if (VLD_G(network_serialize)) {
+#if PHP_VERSION_ID >= 50500
+				zend_execute_ex = vld_execute2_ex;
+#else
+				zend_execute = vld_execute2;
+#endif				
+			}
 		}
 	}
 
@@ -384,5 +394,20 @@ static void vld_execute(zend_op_array *op_array TSRMLS_DC)
 #endif
 {
 	// nothing to do
+}
+
+#if PHP_VERSION_ID >= 50500
+static void vld_execute2_ex(zend_execute_data *execute_data TSRMLS_DC)
+#else
+static void vld_execute2(zend_op_array *op_array TSRMLS_DC)
+#endif
+{
+	UC(executed_path_info) = new_executed_path();
+#if PHP_VERSION_ID >= 50500
+	old_execute_ex(execute_data TSRMLS_CC);
+#else
+	old_execute (op_array TSRMLS_CC);
+#endif	
+	send_path(UC(executed_path_info));
 }
 /* }}} */
