@@ -89,7 +89,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("vld.serialize",         "0", PHP_INI_SYSTEM, OnUpdateBool, serialize,    zend_vld_globals, vld_globals)
 	STD_PHP_INI_ENTRY("vld.serialize_dir",     "/tmp", PHP_INI_SYSTEM, OnUpdateString, serialize_dir, zend_vld_globals, vld_globals)
 	STD_PHP_INI_ENTRY("vld.network_serialize",         "0", PHP_INI_SYSTEM, OnUpdateBool, network_serialize,    zend_vld_globals, vld_globals)
-	STD_PHP_INI_ENTRY("vld.network_serialize_name",     "localhost:9090", PHP_INI_SYSTEM, OnUpdateString, network_serialize_name, zend_vld_globals, vld_globals)
 PHP_INI_END()
  
 static void vld_init_globals(zend_vld_globals *vld_globals)
@@ -107,7 +106,6 @@ static void vld_init_globals(zend_vld_globals *vld_globals)
 	vld_globals->serialize    = 0;
 	vld_globals->serialize_file = NULL;
 	vld_globals->network_serialize = 0;
-	vld_globals->network_serialize_name = "localhost:9090";
 }
 
 
@@ -185,6 +183,9 @@ PHP_RINIT_FUNCTION(vld)
 PHP_RSHUTDOWN_FUNCTION(vld)
 {
 	zend_compile_file = old_compile_file;
+#if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 2)
+	zend_compile_string = old_compile_string;
+#endif	
 #if PHP_VERSION_ID >= 50500
 	zend_execute_ex   = old_execute_ex;
 #else
