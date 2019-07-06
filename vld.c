@@ -351,6 +351,8 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 		vld_dump_oparray (op_array TSRMLS_CC);
 	}
 
+	// I think Zend compiles function and class definitions and stores them to compiler globals (CG) when compiling the overall scripts.
+	// They are looked up during function calls and their opcode arrays are retrieved.
 	zend_hash_apply_with_arguments (CG(function_table) APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe, 0);
 	zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle TSRMLS_CC);
 

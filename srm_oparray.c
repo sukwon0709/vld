@@ -865,6 +865,9 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		set_opcode_list_funcname(&c_opcode_list, opa->function_name ? strdup(ZSTRING_VALUE(opa->function_name)) : "__main");
 	}
 
+	if (VLD_G(dump_paths)) {
+		vld_analyse_oparray(opa, set, branch_info TSRMLS_CC);
+	}
 	if (VLD_G(format)) {
 		vld_printf (stderr, "filename:%s%s\n", VLD_G(col_sep), ZSTRING_VALUE(opa->filename));
 		vld_printf (stderr, "function name:%s%s\n", VLD_G(col_sep), ZSTRING_VALUE(opa->function_name));
