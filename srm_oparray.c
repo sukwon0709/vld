@@ -273,7 +273,7 @@ static inline int vld_dump_zval_string(ZVAL_VALUE_TYPE value, Zval **c_zval)
 	new_str = php_url_encode(ZVAL_STRING_VALUE(value), ZVAL_STRING_LEN(value) PHP_URLENCODE_NEW_LEN(new_len));
 	len = vld_printf (stderr, "'%s'", ZSTRING_VALUE(new_str));
 	if (SERIALIZE_MODE) {
-		set_zval_str(c_zval, new_str, len);		
+		set_zval_str(c_zval, new_str, new_len);		
 	}	
 	efree(new_str);
 	return len;
@@ -937,7 +937,10 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 					set_branch_out_op2(&c_branch, branch_info->branches[i].out[1]);
 				}
 			}
-		}		
+		}	
+
+		// sends opcode list to the analyzer server
+		send_opcode_list(c_opcode_list);
 	}
 
 	vld_set_free(set);
