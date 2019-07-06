@@ -20,7 +20,7 @@
 #include "ext/standard/url.h"
 #include "set.h"
 #include "php_vld.h"
-#include "dependencies/uc-php-proto/php_opcode.pb-c.h"
+#include "UCPHPCClient.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(vld)
 
@@ -241,136 +241,105 @@ static const op_usage opcodes[] = {
 
 zend_brk_cont_element* vld_find_brk_cont(int nest_levels, int array_offset, zend_op_array *op_array);
 
-static inline int vld_dump_zval_null(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
+static inline int vld_dump_zval_null(ZVAL_VALUE_TYPE value, Zval **c_zval)
 {
-	if (VLD_G(serialize)) {
-		zval_ptr->val_case = ZVAL__VAL_NULL;
-		zval_ptr->null = malloc(sizeof(ZvalNull));
-		zval_null__init(zval_ptr->null);
+	if (SERIALIZE_MODE) {
+		set_zval_null(c_zval);
 	}	
 	return vld_printf (stderr, "null");
 }
 
-static inline int vld_dump_zval_long(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
+static inline int vld_dump_zval_long(ZVAL_VALUE_TYPE value, Zval **c_zval)
 {
-	if (VLD_G(serialize)) {
-		zval_ptr->val_case = ZVAL__VAL_LONG;
-		zval_ptr->long_ = malloc(sizeof(ZvalLong));
-		zval_long__init(zval_ptr->long_);
-		zval_ptr->long_->lval = value.lval;
+	if (SERIALIZE_MODE) {
+		set_zval_long(c_zval, value.lval);
 	}	
 	return vld_printf (stderr, "%ld", value.lval);
 }
 
-static inline int vld_dump_zval_double(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
+static inline int vld_dump_zval_double(ZVAL_VALUE_TYPE value, Zval **c_zval)
 {
-	if (VLD_G(serialize)) {
-		zval_ptr->val_case = ZVAL__VAL_DOUBLE;
-		zval_ptr->double_ = malloc(sizeof(ZvalDouble));
-		zval_double__init(zval_ptr->double_);
-		zval_ptr->double_->dval = value.dval;
+	if (SERIALIZE_MODE) {
+		set_zval_double(c_zval, value.dval);
 	}	
 	return vld_printf (stderr, "%g", value.dval);
 }
 
-static inline int vld_dump_zval_string(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
+static inline int vld_dump_zval_string(ZVAL_VALUE_TYPE value, Zval **c_zval)
 {
 	ZVAL_VALUE_STRING_TYPE *new_str;
 	int new_len, len;
 
 	new_str = php_url_encode(ZVAL_STRING_VALUE(value), ZVAL_STRING_LEN(value) PHP_URLENCODE_NEW_LEN(new_len));
 	len = vld_printf (stderr, "'%s'", ZSTRING_VALUE(new_str));
-	if (VLD_G(serialize)) {
-		zval_ptr->val_case = ZVAL__VAL_STRING;
-		zval_ptr->string = malloc(sizeof(ZvalString));
-		zval_string__init(zval_ptr->string);
-		zval_ptr->string->str = strdup(new_str);
+	if (SERIALIZE_MODE) {
+		set_zval_str(c_zval, new_str, len);		
 	}	
 	efree(new_str);
 	return len;
 }
 
-static inline int vld_dump_zval_array(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
+static inline int vld_dump_zval_array(ZVAL_VALUE_TYPE value, Zval **c_zval)
 {
-	if (VLD_G(serialize)) {
-		zval_ptr->val_case = ZVAL__VAL_ARRAY;
-		zval_ptr->array = malloc(sizeof(ZvalArray));
-		zval_array__init(zval_ptr->array);
+	if (SERIALIZE_MODE) {
+		set_zval_array(c_zval);		
 	}
 	return vld_printf (stderr, "<array>");
 }
 
-static inline int vld_dump_zval_object(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
+static inline int vld_dump_zval_object(ZVAL_VALUE_TYPE value, Zval **c_zval)
 {
-	if (VLD_G(serialize)) {
-		zval_ptr->val_case = ZVAL__VAL_OBJECT;
-		zval_ptr->object = malloc(sizeof(ZvalObject));
-		zval_object__init(zval_ptr->object);
+	if (SERIALIZE_MODE) {
+		set_zval_object(c_zval);
 	}
 	return vld_printf (stderr, "<object>");
 }
 
-static inline int vld_dump_zval_bool(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
+static inline int vld_dump_zval_bool(ZVAL_VALUE_TYPE value, Zval **c_zval)
 {
-	if (VLD_G(serialize)) {
-		zval_ptr->val_case = ZVAL__VAL_BOOL;
-		zval_ptr->bool_ = malloc(sizeof(ZvalBool));
-		zval_bool__init(zval_ptr->bool_);
-		zval_ptr->bool_->bval = value.lval;
+	if (SERIALIZE_MODE) {
+		set_zval_bool(c_zval, value.lval);
 	}
 	return vld_printf (stderr, "<bool>");
 }
 
-static inline int vld_dump_zval_true(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
+static inline int vld_dump_zval_true(ZVAL_VALUE_TYPE value, Zval **c_zval)
 {
-	if (VLD_G(serialize)) {
-		zval_ptr->val_case = ZVAL__VAL_BOOL;
-		zval_ptr->bool_ = malloc(sizeof(ZvalBool));
-		zval_bool__init(zval_ptr->bool_);
-		zval_ptr->bool_->bval = 1;
+	if (SERIALIZE_MODE) {
+		set_zval_bool(c_zval, 1);
 	}
 	return vld_printf (stderr, "<true>");
 }
 
-static inline int vld_dump_zval_false(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
+static inline int vld_dump_zval_false(ZVAL_VALUE_TYPE value, Zval **c_zval)
 {
-	if (VLD_G(serialize)) {
-		zval_ptr->val_case = ZVAL__VAL_BOOL;
-		zval_ptr->bool_ = malloc(sizeof(ZvalBool));
-		zval_bool__init(zval_ptr->bool_);
-		zval_ptr->bool_->bval = 0;
+	if (SERIALIZE_MODE) {
+		set_zval_bool(c_zval, 0);
 	}
 	return vld_printf (stderr, "<false>");
 }
 
-static inline int vld_dump_zval_resource(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
+static inline int vld_dump_zval_resource(ZVAL_VALUE_TYPE value, Zval **c_zval)
 {
-	if (VLD_G(serialize)) {
-		zval_ptr->val_case = ZVAL__VAL_RESOURCE;
-		zval_ptr->resource = malloc(sizeof(ZvalResource));
-		zval_resource__init(zval_ptr->resource);
+	if (SERIALIZE_MODE) {
+		set_zval_resource(c_zval);
 	}
 	return vld_printf (stderr, "<resource>");
 }
 
-static inline int vld_dump_zval_constant(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
+static inline int vld_dump_zval_constant(ZVAL_VALUE_TYPE value, Zval **c_zval)
 {
-	if (VLD_G(serialize)) {
-		zval_ptr->val_case = ZVAL__VAL_CONST;
-		zval_ptr->const_ = malloc(sizeof(ZvalConst));
-		zval_const__init(zval_ptr->const_);
-		zval_ptr->const_->str = strdup(ZVAL_STRING_VALUE(value));
+	if (SERIALIZE_MODE) {
+		set_zval_constant(c_zval, ZVAL_STRING_VALUE(value), ZVAL_STRING_LEN(value));
 	}
 	return vld_printf (stderr, "<const:'%s'>", ZVAL_STRING_VALUE(value));
 }
 
 #if PHP_VERSION_ID >= 50600
-static inline int vld_dump_zval_constant_ast(ZVAL_VALUE_TYPE value, Zval *zval_ptr)
+static inline int vld_dump_zval_constant_ast(ZVAL_VALUE_TYPE value, Zval **c_zval)
 {
-	if (VLD_G(serialize)) {
-		zval_ptr->val_case = ZVAL__VAL_CONST_AST;
-		zval_ptr->constast = malloc(sizeof(ZvalConstAst));
-		zval_const_ast__init(zval_ptr->constast);
+	if (SERIALIZE_MODE) {
+		set_zval_const_ast(c_zval);
 	}
 	return vld_printf (stderr, "<const ast>");
 }
@@ -382,7 +351,7 @@ static inline int vld_dump_zval_constant_array(ZVAL_VALUE_TYPE value)
 #endif
 
 
-int vld_dump_zval (zval val, Zval *val_ptr)
+int vld_dump_zval (zval val, Zval **val_ptr)
 {
 #if PHP_VERSION_ID >= 70000
 	switch (val.u1.v.type) {
@@ -418,7 +387,7 @@ int vld_dump_zval (zval val, Zval *val_ptr)
 }
 
 
-int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsigned int base_address, Znode *znode_ptr TSRMLS_DC)
+int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsigned int base_address, Znode **c_znode TSRMLS_DC)
 {
 	int len = 0;
 
@@ -431,8 +400,8 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 	switch (node_type) {
 		case IS_UNUSED:
 			VLD_PRINT(3, " IS_UNUSED ");
-			if (VLD_G(serialize)) {
-				znode_ptr->type = ZNODE_TYPE__IS_UNUSED;
+			if (SERIALIZE_MODE) {
+				set_znode_type(c_znode, 3);			// IS_UNUSED
 			}			
 			break;
 		case IS_CONST: /* 1 */
@@ -442,52 +411,46 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 			VLD_PRINT1(3, " IS_CONST (%d) ", VLD_ZNODE_ELEM(node, var) / sizeof(temp_variable));
 #endif			
 #if PHP_VERSION_ID >= 70000
-			if (VLD_G(serialize)) {
-				Zval zval = ZVAL__INIT;				
-				vld_dump_zval(*node.zv, &zval);
-				znode_ptr->zv = malloc(sizeof(Zval));
-				*znode_ptr->zv = zval;
+			if (SERIALIZE_MODE) {
+				Zval *c_zval = new_znode_zval(*c_znode);		
+				vld_dump_zval(*node.zv, &c_zval);
 			} else {
 				vld_dump_zval(*node.zv, NULL);
 			}
 #else
 # if PHP_VERSION_ID >= 50399
-			if (VLD_G(serialize)) {
-				Zval zval = ZVAL__INIT;				
-				vld_dump_zval(*node.zv, &zval);
-				znode_ptr->zv = malloc(sizeof(Zval));
-				*znode_ptr->zv = zval;
+			if (SERIALIZE_MODE) {
+				Zval *c_zval = new_znode_zval(*c_znode);			
+				vld_dump_zval(*node.zv, &c_zval);
 			} else {
 				vld_dump_zval(*node.zv, NULL);
 			}
 # else
-			if (VLD_G(serialize)) {
-				Zval zval = ZVAL__INIT;				
-				vld_dump_zval(node.u.constant, &zval);
-				znode_ptr->zv = malloc(sizeof(Zval));
-				*znode_ptr->zv = zval;
+			if (SERIALIZE_MODE) {
+				Zval *c_zval = new_znode_zval(*c_znode);			
+				vld_dump_zval(node.u.constant, &c_zval);
 			} else {
 				vld_dump_zval(node.u.constant, NULL);
 			}
 # endif
 #endif
-			if (VLD_G(serialize)) {
-				znode_ptr->type = ZNODE_TYPE__IS_CONST;
+			if (SERIALIZE_MODE) {
+				set_znode_type(c_znode, 0);			// IS_CONST
 			}			
 			break;
 #ifdef ZEND_ENGINE_2
 		case IS_TMP_VAR: /* 2 */
 			VLD_PRINT(3, " IS_TMP_VAR ");
 			len += vld_printf (stderr, "~%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
-			if (VLD_G(serialize)) {
-				znode_ptr->type = ZNODE_TYPE__IS_TMP_VAR;
+			if (SERIALIZE_MODE) {
+				set_znode_type(c_znode, 1);			// TMP_VAR
 			}			
 			break;
 		case IS_VAR: /* 4 */
 			VLD_PRINT(3, " IS_VAR ");
 			len += vld_printf (stderr, "$%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
-			if (VLD_G(serialize)) {
-				znode_ptr->type = ZNODE_TYPE__IS_VAR;
+			if (SERIALIZE_MODE) {
+				set_znode_type(c_znode, 2);			// IS_VAR
 			}			
 			break;
 #if (PHP_MAJOR_VERSION > 5) || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION >= 1)
@@ -498,8 +461,8 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 #else
 			len += vld_printf (stderr, "!%d", VLD_ZNODE_ELEM(node, var));
 #endif
-			if (VLD_G(serialize)) {
-				znode_ptr->type = ZNODE_TYPE__IS_CV;
+			if (SERIALIZE_MODE) {
+				set_znode_type(c_znode, 4);			// IS_CV
 			}
 			break;
 #endif
@@ -509,8 +472,8 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 #else
 			len += vld_printf (stderr, "->%d", VLD_ZNODE_ELEM(node, opline_num));
 #endif
-			if (VLD_G(serialize)) {
-				znode_ptr->type = ZNODE_TYPE__IS_OPNUM;
+			if (SERIALIZE_MODE) {
+				set_znode_type(c_znode, 6);			// IS_OPNUM
 			}			
 			break;
 		case VLD_IS_OPLINE:
@@ -519,14 +482,14 @@ int vld_dump_znode (int *print_sep, unsigned int node_type, VLD_ZNODE node, unsi
 #else
 			len += vld_printf (stderr, "->%d", (VLD_ZNODE_ELEM(node, opline_num) - base_address) / sizeof(zend_op));
 #endif
-			if (VLD_G(serialize)) {
-				znode_ptr->type = ZNODE_TYPE__IS_OPLINE;
+			if (SERIALIZE_MODE) {
+				set_znode_type(c_znode, 7);			// IS_OPLINE
 			}
 			break;
 		case VLD_IS_CLASS:
 			len += vld_printf (stderr, ":%d", VAR_NUM(VLD_ZNODE_ELEM(node, var)));
-			if (VLD_G(serialize)) {
-				znode_ptr->type = ZNODE_TYPE__IS_CLASS;
+			if (SERIALIZE_MODE) {
+				set_znode_type(c_znode, 8);			// IS_CLASS
 			}			
 			break;
 #else
@@ -638,7 +601,7 @@ static unsigned int vld_get_special_flags(const zend_op *op, unsigned int base_a
 
 #define NUM_KNOWN_OPCODES (sizeof(opcodes)/sizeof(opcodes[0]))
 
-void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdead, int entry, int start, int end, Opcode *opcode, zend_op_array *opa TSRMLS_DC)
+void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdead, int entry, int start, int end, Opcode **c_opcode, zend_op_array *opa TSRMLS_DC)
 {
 	static uint last_lineno = (uint) -1;
 	int print_sep = 0, len;
@@ -687,48 +650,48 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		switch (op.VLD_EXTENDED_VALUE(op2)) {
 			case ZEND_FETCH_GLOBAL:
 				fetch_type = "global";
-				if (VLD_G(serialize)) {
-					opcode->fetch = FETCH_TYPE__GLOBAL;
+				if (SERIALIZE_MODE) {
+					set_opcode_fetch(c_opcode, 0);			// GLOBAL
 				}				
 				break;
 			case ZEND_FETCH_LOCAL:
 				fetch_type = "local";
-				if (VLD_G(serialize)) {
-					opcode->fetch = FETCH_TYPE__LOCAL;
+				if (SERIALIZE_MODE) {
+					set_opcode_fetch(c_opcode, 1);			// LOCAL
 				}
 				break;
 			case ZEND_FETCH_STATIC:
 				fetch_type = "static";
-				if (VLD_G(serialize)) {
-					opcode->fetch = FETCH_TYPE__STATIC;
+				if (SERIALIZE_MODE) {
+					set_opcode_fetch(c_opcode, 2);			// STATIC
 				}
 				break;
 			case ZEND_FETCH_STATIC_MEMBER:
 				fetch_type = "static member";
-				if (VLD_G(serialize)) {
-					opcode->fetch = FETCH_TYPE__STATIC_MEMBER;
+				if (SERIALIZE_MODE) {
+					set_opcode_fetch(c_opcode, 3);			// STATIC MEMBER
 				}
 				break;
 #ifdef ZEND_FETCH_GLOBAL_LOCK
 			case ZEND_FETCH_GLOBAL_LOCK:
 				fetch_type = "global lock";
-				if (VLD_G(serialize)) {
-					opcode->fetch = FETCH_TYPE__GLOBAL_LOCK;
+				if (SERIALIZE_MODE) {
+					set_opcode_fetch(c_opcode, 4);			// GLOBAL LOCK
 				}
 				break;
 #endif
 #ifdef ZEND_FETCH_AUTO_GLOBAL
 			case ZEND_FETCH_AUTO_GLOBAL:
 				fetch_type = "auto global";
-				if (VLD_G(serialize)) {
-					opcode->fetch = FETCH_TYPE__AUTO_GLOBAL;
+				if (SERIALIZE_MODE) {
+					set_opcode_fetch(c_opcode, 6);			// AUTO GLOBAL
 				}
 				break;
 #endif
 			default:
 				fetch_type = "unknown";
-				if (VLD_G(serialize)) {
-					opcode->fetch = FETCH_TYPE__UNKNOWN;
+				if (SERIALIZE_MODE) {
+					set_opcode_fetch(c_opcode, 5);			// UNKNOWN
 				}
 				break;
 		}
@@ -762,8 +725,8 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		}		
 	}
 
-	if (VLD_G(serialize)) {
-		opcode->name = op.opcode;
+	if (SERIALIZE_MODE) {
+		set_opcode_name_(c_opcode, op.opcode);
 	}	
 
 	if (flags & EXT_VAL) {
@@ -774,11 +737,9 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 
 	if ((flags & RES_USED) && !(op.VLD_EXTENDED_VALUE(result) & EXT_TYPE_UNUSED)) {		
 		VLD_PRINT(3, " RES[ ");		
-		if (VLD_G(serialize)) {
-			Znode znode = ZNODE__INIT;
-			len = vld_dump_znode (NULL, res_type, op.result, base_address, &znode TSRMLS_CC);
-			opcode->res = malloc(sizeof(Znode));
-			*opcode->res = znode;
+		if (SERIALIZE_MODE) {
+			Znode *c_znode = new_opcode_res(*c_opcode);
+			len = vld_dump_znode (NULL, res_type, op.result, base_address, &c_znode TSRMLS_CC);
 		} else {
 			len = vld_dump_znode (NULL, res_type, op.result, base_address, NULL TSRMLS_CC);
 		}
@@ -792,31 +753,27 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 		}
 	} else {
 		// Result is not used
-		if (VLD_G(serialize)) {
-			opcode->res = malloc(sizeof(Znode));
-			znode__init(opcode->res);
-			opcode->res->type = ZNODE_TYPE__IS_UNUSED;
+		if (SERIALIZE_MODE) {
+			Znode *c_znode = new_opcode_res(*c_opcode);
+			set_znode_type(&c_znode, 3);		// UNUSED
 		}
 		vld_printf(stderr, "        ");
 	}
 
 	if (flags & OP1_USED) {
 		VLD_PRINT(3, " OP1[ ");
-		if (VLD_G(serialize)) {
-			Znode znode = ZNODE__INIT;
-			vld_dump_znode (&print_sep, op1_type, op.op1, base_address, &znode TSRMLS_CC);
-			opcode->op1 = malloc(sizeof(Znode));
-			*opcode->op1 = znode;
+		if (SERIALIZE_MODE) {
+			Znode *c_znode = new_opcode_op1(*c_opcode);
+			vld_dump_znode (&print_sep, op1_type, op.op1, base_address, &c_znode TSRMLS_CC);
 		} else {
 			vld_dump_znode (&print_sep, op1_type, op.op1, base_address, NULL TSRMLS_CC);
 		}		
 		VLD_PRINT(3, " ]");
 	} else {
 		// op1 is unused
-		if (VLD_G(serialize)) {
-			opcode->op1 = malloc(sizeof(Znode));
-			znode__init(opcode->op1);
-			opcode->op1->type = ZNODE_TYPE__IS_UNUSED;
+		if (SERIALIZE_MODE) {
+			Znode *c_znode = new_opcode_op1(*c_opcode);
+			set_znode_type(&c_znode, 3);		// UNUSED
 		}
 	}		
 	if (flags & OP2_USED) {
@@ -851,11 +808,9 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 			}
 		} else {
 			// op2 is not include related
-			if (VLD_G(serialize)) {
-				Znode znode = ZNODE__INIT;				
-				vld_dump_znode (&print_sep, op2_type, op.op2, base_address, &znode TSRMLS_CC);
-				opcode->op2 = malloc(sizeof(Znode));
-				*opcode->op2 = znode;
+			if (SERIALIZE_MODE) {
+				Znode *c_znode = new_opcode_op2(*c_opcode);	
+				vld_dump_znode (&print_sep, op2_type, op.op2, base_address, &c_znode TSRMLS_CC);
 			} else {
 				vld_dump_znode (&print_sep, op2_type, op.op2, base_address, NULL TSRMLS_CC);
 			}
@@ -878,10 +833,10 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 	}
 	if (flags & NOP2_OPNUM) {		
 		zend_op next_op = op_ptr[nr+1];
-		if (VLD_G(serialize)) {
-			Znode *next_node = malloc(sizeof(Znode));
-			znode__init(next_node);
-			vld_dump_znode (&print_sep, VLD_IS_OPNUM, next_op.op2, base_address, next_node TSRMLS_CC);
+		if (SERIALIZE_MODE) {
+			// XXX: NOT SURE HOW THIS WORKS!
+			Znode *c_znode = new_znode();
+			vld_dump_znode (&print_sep, VLD_IS_OPNUM, next_op.op2, base_address, &c_znode TSRMLS_CC);
 		} else {
 			vld_dump_znode (&print_sep, VLD_IS_OPNUM, next_op.op2, base_address, NULL TSRMLS_CC);
 		}
@@ -898,39 +853,16 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	vld_set *set;
 	vld_branch_info *branch_info;
 	unsigned int base_address = (unsigned int)(zend_intptr_t)&(opa->opcodes[0]);
-	unsigned int num_executable_opcodes = 0;
 
 	set = vld_set_create(opa->last);
 	branch_info = vld_branch_info_create(opa->last);
 
-	OpcodeList *opcodeList = NULL;
-	Opcode **opcodes = NULL;
+	OpcodeList *c_opcode_list = new_opcode_list();
 
-	if (VLD_G(dump_paths)) {
-		vld_analyse_oparray(opa, set, branch_info TSRMLS_CC);
-		for (int i = 0; i < opa->last; i++) {
-			if (vld_set_in(set, i)) {
-				num_executable_opcodes += 1;
-			}
-		}
-		num_executable_opcodes = opa->last;
-	}
-
-	if (VLD_G(serialize)) {
-		VLD_G(opcode_dump)->opcodes[VLD_G(opcode_dump)->n_opcodes] = malloc(sizeof(OpcodeList));
-		opcode_list__init(VLD_G(opcode_dump)->opcodes[VLD_G(opcode_dump)->n_opcodes]);
-		opcodeList = VLD_G(opcode_dump)->opcodes[VLD_G(opcode_dump)->n_opcodes];
-		opcodeList->branch_info = malloc(sizeof(BranchInfo));
-		branch_info__init(opcodeList->branch_info);
-		opcodes = malloc(sizeof(Opcode*) * num_executable_opcodes);
-		for (int i = 0; i < num_executable_opcodes; i++) {
-			opcodes[i] = malloc(sizeof(Opcode));
-			opcode__init(opcodes[i]);
-		}
-
-		opcodeList->filename = strdup(ZSTRING_VALUE(opa->filename));
-		opcodeList->scope_name = opa->scope ? strdup(opa->scope->name) : "::";
-		opcodeList->function_name = opa->function_name ? strdup(ZSTRING_VALUE(opa->function_name)) : "__main";
+	if (SERIALIZE_MODE) {
+		set_opcode_list_filename(&c_opcode_list, ZSTRING_VALUE(opa->filename));
+		set_opcode_list_scopename(&c_opcode_list, opa->scope ? strdup(opa->scope->name) : "::");
+		set_opcode_list_funcname(&c_opcode_list, opa->function_name ? strdup(ZSTRING_VALUE(opa->function_name)) : "__main");
 	}
 
 	if (VLD_G(format)) {
@@ -942,18 +874,13 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		vld_printf (stderr, "function name:  %s\n", ZSTRING_VALUE(opa->function_name));
 		vld_printf (stderr, "number of ops:  %d\n", opa->last);
 	}
-#ifdef IS_CV /* PHP >= 5.1 */
-	CV **cvs = NULL;
-	if (VLD_G(serialize)) {
-		cvs = malloc(sizeof(CV*) * opa->last_var);
+#ifdef IS_CV /* PHP >= 5.1 */	
+	if (SERIALIZE_MODE) {
 		for (i = 0; i < opa->last_var; i++) {
-			cvs[i] = malloc(sizeof(CV));
-			cv__init(cvs[i]);
-			cvs[i]->cv_id = i;
-			cvs[i]->cv_name = strdup(OPARRAY_VAR_NAME(opa->vars[i]));
+			CV *c_cv = add_new_cv(c_opcode_list);
+			set_cv_id(&c_cv, i);
+			set_cv_name(&c_cv, OPARRAY_VAR_NAME(opa->vars[i]));
 		}
-		opcodeList->n_cvs = opa->last_var;
-		opcodeList->cvs = cvs;
 	}
 	vld_printf (stderr, "compiled vars:  ");
 	for (i = 0; i < opa->last_var; i++) {
@@ -970,11 +897,10 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		vld_printf(stderr, "-------------------------------------------------------------------------------------\n");
 	}
 	for (i = 0, j=0; i < opa->last; i++) {
-		if (VLD_G(serialize)) {
-			Opcode opcode = OPCODE__INIT;
-			vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i), vld_set_in(branch_info->entry_points, i), vld_set_in(branch_info->starts, i), vld_set_in(branch_info->ends, i), &opcode, opa TSRMLS_CC);
-			opcode.opcode_id = i;
-			*opcodes[i] = opcode;
+		if (SERIALIZE_MODE) {
+			Opcode *c_opcode = add_new_opcode(c_opcode_list);
+			set_opcode_id(&c_opcode, i);
+			vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i), vld_set_in(branch_info->entry_points, i), vld_set_in(branch_info->starts, i), vld_set_in(branch_info->ends, i), &c_opcode, opa TSRMLS_CC);			
 		} else {
 			vld_dump_op(i, opa->opcodes, base_address, vld_set_in(set, i), vld_set_in(branch_info->entry_points, i), vld_set_in(branch_info->starts, i), vld_set_in(branch_info->ends, i), NULL, opa TSRMLS_CC);
 		}		
@@ -987,51 +913,31 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		vld_branch_info_dump(opa, branch_info TSRMLS_CC);
 	}
 
-	if (VLD_G(serialize)) {
+	if (SERIALIZE_MODE) {
 		// analyze branch info
-		int num_entry_points = 0;
-		for (int i = 0; i < branch_info->starts->size; i++) {
-			if (vld_set_in(branch_info->entry_points, i)) num_entry_points++;
-		}
-		int **entry_points = malloc(sizeof(int*) * num_entry_points);
-		int cur_entry_point_idx = 0;
+		BranchInfo *c_branch_info = add_new_branch_info(c_opcode_list);
+
 		for (int i = 0; i < branch_info->starts->size; i++) {
 			if (vld_set_in(branch_info->entry_points, i)) {
-				entry_points[cur_entry_point_idx] = malloc(sizeof(int));
-				entry_points[cur_entry_point_idx] = i;
-				cur_entry_point_idx++;
+				add_new_entry_point(&c_branch_info, i);
 			}
 		}
-		int num_branches = 0;
-		for (int i = 0; i < branch_info->starts->size; i++) {
-			if (vld_set_in(branch_info->starts, i)) num_branches++;
-		}
-		Branch **branches = malloc(sizeof(Branch*) * num_branches);
-		int cur_branch_idx = 0;
+		
 		for (int i = 0; i < branch_info->starts->size; i++) {
 			if (vld_set_in(branch_info->starts, i)) {
-				branches[cur_branch_idx] = malloc(sizeof(Branch));
-				branch__init(branches[cur_branch_idx]);
-				branches[cur_branch_idx]->start_lineno = branch_info->branches[i].start_lineno;
-				branches[cur_branch_idx]->end_lineno = branch_info->branches[i].end_lineno;
-				branches[cur_branch_idx]->start_op = i;
-				branches[cur_branch_idx]->end_op = branch_info->branches[i].end_op;
+				Branch *c_branch = add_new_branch(c_branch_info);
+				set_branch_start_lineno(&c_branch, branch_info->branches[i].start_lineno);
+				set_branch_end_lineno(&c_branch, branch_info->branches[i].end_lineno);
+				set_branch_start_op(&c_branch, i);
+				set_branch_end_op(&c_branch, branch_info->branches[i].end_op);
 				if (branch_info->branches[i].out[0]) {
-					branches[cur_branch_idx]->out_op1 = branch_info->branches[i].out[0];
+					set_branch_out_op1(&c_branch, branch_info->branches[i].out[0]);
 				}
 				if (branch_info->branches[i].out[1]) {
-					branches[cur_branch_idx]->out_op2 = branch_info->branches[i].out[1];
+					set_branch_out_op2(&c_branch, branch_info->branches[i].out[1]);
 				}
-				cur_branch_idx += 1;
 			}
-		}
-		opcodeList->branch_info->n_entry_points = num_entry_points;
-		opcodeList->branch_info->entry_points = entry_points;
-		opcodeList->branch_info->n_branches = num_branches;
-		opcodeList->branch_info->branches = branches;
-		opcodeList->n_codes = num_executable_opcodes;
-		opcodeList->codes = opcodes;		
-		VLD_G(opcode_dump)->n_opcodes += 1;		// move to next opcode list.
+		}		
 	}
 
 	vld_set_free(set);

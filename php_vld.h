@@ -15,7 +15,7 @@
 #define PHP_VLD_H
 
 #include "php.h"
-#include "dependencies/uc-php-proto/php_opcode.pb-c.h"
+#include "UCPHPCClient.h"
 
 extern zend_module_entry vld_module_entry;
 #define phpext_vld_ptr &vld_module_entry
@@ -48,10 +48,11 @@ ZEND_BEGIN_MODULE_GLOBALS(vld)
 	char *save_dir;
 	FILE *path_dump_file;
 	int dump_paths;
-	int serialize;
+	int serialize;					// dumps opcodes to serialize_file
 	char *serialize_dir;
 	FILE *serialize_file;
-	OpcodeDump *opcode_dump;
+	int network_serialize;								// sends opcodes to remote server for analysis
+	char *network_serialize_name;						// remote server host:port
 ZEND_END_MODULE_GLOBALS(vld) 
 
 int vld_printf(FILE *stream, const char* fmt, ...);
@@ -65,6 +66,8 @@ int vld_printf(FILE *stream, const char* fmt, ...);
 #define VLD_PRINT1(v,args,x) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args, (x)); }
 #define VLD_PRINT2(v,args,x,y) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args, (x), (y)); }
 #define VLD_PRINT3(v,args,x,y,z) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args, (x), (y), (z)); }
+
+#define SERIALIZE_MODE (VLD_G(serialize) || VLD_G(network_serialize))
 
 #if PHP_VERSION_ID >= 70000
 # define ZHASHKEYSTR(k) ((k)->key->val)

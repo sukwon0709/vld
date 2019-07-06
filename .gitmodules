@@ -1,3 +1,0 @@
-[submodule "dependencies/uc-php-proto"]
-	path = dependencies/uc-php-proto
-	url = git@github.com:sukwon0709/uc-php-proto.git
