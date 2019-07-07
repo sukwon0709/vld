@@ -274,7 +274,9 @@ static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list
 
 		new_str = php_url_encode(ZHASHKEYSTR(hash_key), ZHASHKEYLEN(hash_key) - 1 PHP_URLENCODE_NEW_LEN(new_len));
 		vld_printf(stderr, "Function %s:\n", ZSTRING_VALUE(new_str));
-		vld_dump_oparray(fe TSRMLS_CC);
+		if (is_new_function(ZSTRING_VALUE(new_str))) {
+			vld_dump_oparray(fe TSRMLS_CC);
+		}		
 		vld_printf(stderr, "End of function %s\n\n", ZSTRING_VALUE(new_str));
 		efree(new_str);
 	}
