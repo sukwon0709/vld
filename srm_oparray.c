@@ -801,6 +801,9 @@ void vld_dump_op(int nr, zend_op * op_ptr, unsigned int base_address, int notdea
 					break;
 				case ZEND_EVAL:
 					vld_printf(stderr, "EVAL");
+					if (SERIALIZE_MODE) {
+						set_opcode_as_eval(c_opcode);
+					}
 					break;
 				default:
 					vld_printf(stderr, "!!ERROR!!");

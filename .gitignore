@@ -55,3 +55,6 @@ tags
 .svn
 /*~
 /debugclient/*.o
+
+*.pb.h
+*.pb.cc
