@@ -946,7 +946,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		}	
 
 		// sends opcode list to the analyzer server
-		send_opcode_list(c_opcode_list);
+		send_compiled_opcode_list(c_opcode_list);
 	}
 
 	vld_set_free(set);

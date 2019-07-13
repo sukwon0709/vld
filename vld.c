@@ -406,12 +406,12 @@ static void vld_execute2_ex(zend_execute_data *execute_data TSRMLS_DC)
 static void vld_execute2(zend_op_array *op_array TSRMLS_DC)
 #endif
 {
-	// UC(executed_path_info) = new_executed_path();
+	UC(executed_path_info) = send_executed_opcode_list_and_make_new(UC(executed_path_info));
 #if PHP_VERSION_ID >= 50500
 	old_execute_ex(execute_data TSRMLS_CC);
 #else
 	old_execute (op_array TSRMLS_CC);
 #endif	
-	// send_path(UC(executed_path_info));
+	UC(executed_path_info) = send_executed_opcode_list_and_make_new(UC(executed_path_info));
 }
 /* }}} */
