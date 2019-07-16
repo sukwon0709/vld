@@ -22,6 +22,7 @@
 #include "php_vld.h"
 #include "srm_oparray.h"
 #include "php_globals.h"
+#include "function_table.h"
 
 #if PHP_VERSION_ID >= 50300
 # define APPLY_TSRMLS_CC TSRMLS_CC
@@ -108,8 +109,9 @@ static void vld_init_globals(zend_vld_globals *vld_globals)
 	vld_globals->serialize    = 0;
 	vld_globals->serialize_file = NULL;
 	vld_globals->network_serialize = 0;
+	
+	ZEND_INIT_SYMTABLE_EX(&vld_globals->function_table, 2, 1);
 }
-
 
 PHP_MINIT_FUNCTION(vld)
 {
@@ -133,6 +135,9 @@ PHP_MSHUTDOWN_FUNCTION(vld)
 #else
 	zend_execute        = old_execute;
 #endif
+
+	zend_hash_destroy(&VLD_G(function_table));
+	FREE_HASHTABLE(&VLD_G(function_table));
 
 	return SUCCESS;
 }
@@ -207,6 +212,8 @@ PHP_RSHUTDOWN_FUNCTION(vld)
 		fclose(VLD_G(path_dump_file));
 	}	
 
+	fflush(stderr);
+
 	return SUCCESS;
 }
 
@@ -273,11 +280,13 @@ static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list
 		int new_len;
 
 		new_str = php_url_encode(ZHASHKEYSTR(hash_key), ZHASHKEYLEN(hash_key) - 1 PHP_URLENCODE_NEW_LEN(new_len));
-		vld_printf(stderr, "Function %s:\n", ZSTRING_VALUE(new_str));
-		if (is_new_function(ZSTRING_VALUE(new_str))) {
+		vld_printf(stderr, "FUNCTION %s:\n", ZSTRING_VALUE(new_str));
+		if (!check_function_entry(ZSTRING_VALUE(new_str), &VLD_G(function_table))) {
+			vld_printf(stderr, "FUNCTION %s IS NEW\n", ZSTRING_VALUE(new_str));
 			vld_dump_oparray(fe TSRMLS_CC);
-		}		
-		vld_printf(stderr, "End of function %s\n\n", ZSTRING_VALUE(new_str));
+			add_function_entry(ZSTRING_VALUE(new_str), &VLD_G(function_table));
+		}
+		vld_printf(stderr, "End of FUNCTION %s\n\n", ZSTRING_VALUE(new_str));
 		efree(new_str);
 	}
 
@@ -406,17 +415,25 @@ static void vld_execute2_ex(zend_execute_data *execute_data TSRMLS_DC)
 static void vld_execute2(zend_op_array *op_array TSRMLS_DC)
 #endif
 {
-	const char *filename = strdup(execute_data->op_array->filename);
-	const char *scopename = execute_data->op_array->scope ? strdup(execute_data->op_array->scope->name): NULL;
-	const char *funcname = execute_data->op_array->function_name ? strdup(execute_data->op_array->function_name) : NULL;
-	UC(executed_path_info) = send_executed_opcode_list_and_make_new(UC(executed_path_info));
-	send_start_of_script(filename, scopename, funcname);
+	if (UC(concolic_enabled)) {
+		const char *filename = strdup(execute_data->op_array->filename);
+		const char *scopename = execute_data->op_array->scope ? strdup(execute_data->op_array->scope->name): NULL;
+		const char *funcname = execute_data->op_array->function_name ? strdup(execute_data->op_array->function_name) : NULL;
+		UC(executed_path_info) = send_executed_opcode_list_and_make_new(UC(executed_path_info));
+		send_start_of_script(filename, scopename, funcname);
 #if PHP_VERSION_ID >= 50500
-	old_execute_ex(execute_data TSRMLS_CC);
+		old_execute_ex(execute_data TSRMLS_CC);
 #else
-	old_execute (op_array TSRMLS_CC);
+		old_execute (op_array TSRMLS_CC);
 #endif	
-	UC(executed_path_info) = send_executed_opcode_list_and_make_new(UC(executed_path_info));
-	send_end_of_script(filename, scopename, funcname);
+		UC(executed_path_info) = send_executed_opcode_list_and_make_new(UC(executed_path_info));
+		send_end_of_script(filename, scopename, funcname);
+	} else {
+#if PHP_VERSION_ID >= 50500
+		old_execute_ex(execute_data TSRMLS_CC);
+#else
+		old_execute (op_array TSRMLS_CC);
+#endif			
+	}
 }
 /* }}} */
