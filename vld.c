@@ -92,6 +92,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("vld.serialize",         "0", PHP_INI_SYSTEM, OnUpdateBool, serialize,    zend_vld_globals, vld_globals)
 	STD_PHP_INI_ENTRY("vld.serialize_dir",     "/tmp", PHP_INI_SYSTEM, OnUpdateString, serialize_dir, zend_vld_globals, vld_globals)
 	STD_PHP_INI_ENTRY("vld.network_serialize",         "0", PHP_INI_SYSTEM, OnUpdateBool, network_serialize,    zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.log_path",		   "/tmp/vld.log", PHP_INI_SYSTEM, OnUpdateString, log_path, zend_vld_globals, vld_globals)
 PHP_INI_END()
  
 static void vld_init_globals(zend_vld_globals *vld_globals)
@@ -109,6 +110,8 @@ static void vld_init_globals(zend_vld_globals *vld_globals)
 	vld_globals->serialize    = 0;
 	vld_globals->serialize_file = NULL;
 	vld_globals->network_serialize = 0;
+	vld_globals->log_path = NULL;
+	vld_globals->logger = NULL;
 	
 	ZEND_INIT_SYMTABLE_EX(&vld_globals->function_table, 2, 1);
 }
@@ -192,6 +195,8 @@ PHP_RINIT_FUNCTION(vld)
 		}
 	}
 
+	VLD_G(logger) = fopen(VLD_G(log_path), "a+");
+
 	return SUCCESS;
 }
 
@@ -210,9 +215,10 @@ PHP_RSHUTDOWN_FUNCTION(vld)
 	if (VLD_G(path_dump_file)) {
 		fprintf(VLD_G(path_dump_file), "}\n");
 		fclose(VLD_G(path_dump_file));
-	}	
-
+	}
 	fflush(stderr);
+
+	fclose(VLD_G(logger));		// flushes too
 
 	return SUCCESS;
 }
@@ -280,13 +286,13 @@ static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list
 		int new_len;
 
 		new_str = php_url_encode(ZHASHKEYSTR(hash_key), ZHASHKEYLEN(hash_key) - 1 PHP_URLENCODE_NEW_LEN(new_len));
-		vld_printf(stderr, "FUNCTION %s:\n", ZSTRING_VALUE(new_str));
+		VLD_PRINTF1(0, "FUNCTION %s:\n", ZSTRING_VALUE(new_str));
 		if (!check_function_entry(ZSTRING_VALUE(new_str), &VLD_G(function_table))) {
-			vld_printf(stderr, "FUNCTION %s IS NEW\n", ZSTRING_VALUE(new_str));
+			VLD_PRINTF1(0, "FUNCTION %s IS NEW\n", ZSTRING_VALUE(new_str));
 			vld_dump_oparray(fe TSRMLS_CC);
 			add_function_entry(ZSTRING_VALUE(new_str), &VLD_G(function_table));
 		}
-		vld_printf(stderr, "End of FUNCTION %s\n\n", ZSTRING_VALUE(new_str));
+		VLD_PRINTF1(0, "End of FUNCTION %s\n\n", ZSTRING_VALUE(new_str));
 		efree(new_str);
 	}
 
@@ -315,11 +321,11 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 
 		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) vld_check_fe, (void *)&have_fe TSRMLS_CC);
 		if (have_fe) {
-			vld_printf(stderr, "Class %s:\n", ZSTRING_VALUE(ce->name));
+			VLD_PRINTF1(0, "Class %s:\n", ZSTRING_VALUE(ce->name));
 			zend_hash_apply_with_arguments(&ce->function_table APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe, 0);
-			vld_printf(stderr, "End of class %s.\n\n", ZSTRING_VALUE(ce->name));
+			VLD_PRINTF1(0, "End of class %s.\n\n", ZSTRING_VALUE(ce->name));
 		} else {
-			vld_printf(stderr, "Class %s: [no user functions]\n", ZSTRING_VALUE(ce->name));
+			VLD_PRINTF1(0, "Class %s: [no user functions]\n", ZSTRING_VALUE(ce->name));
 		}
 
 		if (VLD_G(path_dump_file)) {

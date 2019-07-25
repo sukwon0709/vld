@@ -54,6 +54,8 @@ ZEND_BEGIN_MODULE_GLOBALS(vld)
 	int network_serialize;								// sends opcodes to remote server for analysis
 	char *network_serialize_name;						// remote server host:port
 	HashTable function_table;							// records all function names that are parsed
+	char *log_path;										// log path
+	FILE *logger;										// log handle
 ZEND_END_MODULE_GLOBALS(vld) 
 
 int vld_printf(FILE *stream, const char* fmt, ...);
@@ -67,6 +69,11 @@ int vld_printf(FILE *stream, const char* fmt, ...);
 #define VLD_PRINT1(v,args,x) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args, (x)); }
 #define VLD_PRINT2(v,args,x,y) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args, (x), (y)); }
 #define VLD_PRINT3(v,args,x,y,z) if (VLD_G(verbosity) >= (v)) { vld_printf(stderr, args, (x), (y), (z)); }
+
+#define VLD_PRINTF(v,args) if (VLD_G(verbosity) >= (v)) { vld_printf(VLD_G(logger), args); }
+#define VLD_PRINTF1(v,args,x) if (VLD_G(verbosity) >= (v)) { vld_printf(VLD_G(logger), args, (x)); }
+#define VLD_PRINTF2(v,args,x,y) if (VLD_G(verbosity) >= (v)) { vld_printf(VLD_G(logger), args, (x), (y)); }
+#define VLD_PRINTF3(v,args,x,y,z) if (VLD_G(verbosity) >= (v)) { vld_printf(VLD_G(logger), args, (x), (y), (z)); }
 
 #define SERIALIZE_MODE (VLD_G(serialize) || VLD_G(network_serialize))
 

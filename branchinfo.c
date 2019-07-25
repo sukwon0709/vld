@@ -267,7 +267,7 @@ void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info TSRML
 
 	for (i = 0; i < branch_info->starts->size; i++) {
 		if (vld_set_in(branch_info->starts, i)) {
-			printf("branch: #%3d; line: %5d-%5d; sop: %5d; eop: %5d",
+			vld_printf(VLD_G(logger), "branch: #%3d; line: %5d-%5d; sop: %5d; eop: %5d",
 				i,
 				branch_info->branches[i].start_lineno,
 				branch_info->branches[i].end_lineno,
@@ -275,20 +275,20 @@ void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info TSRML
 				branch_info->branches[i].end_op
 			);
 			if (branch_info->branches[i].out[0]) {
-				printf("; out1: %3d", branch_info->branches[i].out[0]);
+				vld_printf(VLD_G(logger), "; out1: %3d", branch_info->branches[i].out[0]);
 			}
 			if (branch_info->branches[i].out[1]) {
-				printf("; out2: %3d", branch_info->branches[i].out[1]);
+				vld_printf(VLD_G(logger), "; out2: %3d", branch_info->branches[i].out[1]);
 			}
-			printf("\n");
+			vld_printf(VLD_G(logger), "\n");
 		}
 	}
 
 	for (i = 0; i < branch_info->paths_count; i++) {
-		printf("path #%d: ", i + 1);
+		vld_printf(VLD_G(logger), "path #%d: ", i + 1);
 		for (j = 0; j < branch_info->paths[i]->elements_count; j++) {
-			printf("%d, ", branch_info->paths[i]->elements[j]);
+			vld_printf(VLD_G(logger), "%d, ", branch_info->paths[i]->elements[j]);
 		}
-		printf("\n");
+		vld_printf(VLD_G(logger), "\n");
 	}
 }
