@@ -140,7 +140,7 @@ PHP_MSHUTDOWN_FUNCTION(vld)
 #endif
 
 	zend_hash_destroy(&VLD_G(function_table));
-	FREE_HASHTABLE(&VLD_G(function_table));
+	//FREE_HASHTABLE(&VLD_G(function_table));
 
 	return SUCCESS;
 }
