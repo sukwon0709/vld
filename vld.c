@@ -447,11 +447,11 @@ static void vld_execute2(zend_op_array *op_array TSRMLS_DC)
 		const char *scopename = execute_data->op_array->scope ? estrdup(execute_data->op_array->scope->name): NULL;
 		const char *funcname = execute_data->op_array->function_name ? estrdup(execute_data->op_array->function_name) : NULL;
 
-		zlog_debug(EG(vldcat), "SEND_EXEUTED_OPCODE_LIST_AND_MAKE_NEW1");
-		UC(current_executed_opcode_list) = send_executed_opcode_list_and_make_new(UC(current_executed_opcode_list));
-
 		zlog_debug(EG(vldcat), "SEND_START_OF_SCRIPT: %s - %s - %s", filename, scopename, funcname);
-		send_start_of_script(filename, scopename, funcname);
+		send_start_of_script(UC(ucphp_request), filename, scopename, funcname);
+
+		// zlog_debug(EG(vldcat), "SEND_EXEUTED_OPCODE_LIST_AND_MAKE_NEW1");
+		UC(current_executed_opcode_list) = new_executed_opcode_list(UC(ucphp_request)); // send_executed_opcode_list_and_make_new(UC(current_executed_opcode_list));
 
 		zlog_debug(EG(vldcat), "START EXECUTING OPCODES!");
 #if PHP_VERSION_ID >= 50500
@@ -460,11 +460,12 @@ static void vld_execute2(zend_op_array *op_array TSRMLS_DC)
 		old_execute (op_array TSRMLS_CC);
 #endif	
 
-		zlog_debug(EG(vldcat), "SEND_EXECUTED_OPCODE_LIST_AND_MAKE_NEW2");		// seems to be expensive point here...
-		UC(current_executed_opcode_list) = send_executed_opcode_list_and_make_new(UC(current_executed_opcode_list));
+		// zlog_debug(EG(vldcat), "SEND_EXECUTED_OPCODE_LIST_AND_MAKE_NEW2");		// seems to be expensive point here...
+		// UC(current_executed_opcode_list) = send_executed_opcode_list_and_make_new(UC(current_executed_opcode_list));
+		// UC(current_executed_opcode_list) = new_executed_opcode_list(UC(ucphp_request));
 
 		zlog_debug(EG(vldcat), "SEND_END_OF_SCRIPT: %s - %s - %s", filename, scopename, funcname);
-		send_end_of_script(filename, scopename, funcname);
+		send_end_of_script(UC(ucphp_request), filename, scopename, funcname);
 
 		efree(filename);
 		if (scopename) efree(scopename);

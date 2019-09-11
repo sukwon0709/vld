@@ -860,7 +860,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	set = vld_set_create(opa->last);
 	branch_info = vld_branch_info_create(opa->last);
 
-	OpcodeList *c_opcode_list = new_opcode_list();
+	OpcodeList *c_opcode_list = new_opcode_list(UC(ucphp_request));
 
 	if (SERIALIZE_MODE) {
 		set_opcode_list_filename(&c_opcode_list, ZSTRING_VALUE(opa->filename));
@@ -946,7 +946,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		}	
 
 		// sends opcode list to the analyzer server
-		send_compiled_opcode_list(c_opcode_list);
+		// send_compiled_opcode_list(c_opcode_list);
 	}
 
 	vld_set_free(set);
