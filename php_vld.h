@@ -54,8 +54,10 @@ ZEND_BEGIN_MODULE_GLOBALS(vld)
 	int network_serialize;								// sends opcodes to remote server for analysis
 	char *network_serialize_name;						// remote server host:port
 	HashTable function_table;							// records all function names that are parsed
+
+	int enable_logging;								// enables logging
 	char *log_path;										// log path
-	FILE *logger;										// log handle
+	FILE *logger;											// log handle
 ZEND_END_MODULE_GLOBALS(vld) 
 
 int vld_printf(FILE *stream, const char* fmt, ...);

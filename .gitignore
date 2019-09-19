@@ -58,3 +58,5 @@ tags
 
 *.pb.h
 *.pb.cc
+
+.vscode

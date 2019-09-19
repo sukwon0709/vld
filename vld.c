@@ -94,6 +94,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("vld.serialize",         "0", PHP_INI_SYSTEM, OnUpdateBool, serialize,    zend_vld_globals, vld_globals)
 	STD_PHP_INI_ENTRY("vld.serialize_dir",     "/tmp", PHP_INI_SYSTEM, OnUpdateString, serialize_dir, zend_vld_globals, vld_globals)
 	STD_PHP_INI_ENTRY("vld.network_serialize",         "0", PHP_INI_SYSTEM, OnUpdateBool, network_serialize,    zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.enable_logging",			"0", PHP_INI_SYSTEM, OnUpdateBool, enable_logging, zend_vld_globals, vld_globals)
 	STD_PHP_INI_ENTRY("vld.log_path",		   "/tmp/vld.log", PHP_INI_SYSTEM, OnUpdateString, log_path, zend_vld_globals, vld_globals)
 PHP_INI_END()
  
@@ -112,6 +113,8 @@ static void vld_init_globals(zend_vld_globals *vld_globals)
 	vld_globals->serialize    = 0;
 	vld_globals->serialize_file = NULL;
 	vld_globals->network_serialize = 0;
+
+	vld_globals->enable_logging = 0;
 	vld_globals->log_path = NULL;
 	vld_globals->logger = NULL;
 	
@@ -197,7 +200,9 @@ PHP_RINIT_FUNCTION(vld)
 		}
 	}
 
-	VLD_G(logger) = fopen(VLD_G(log_path), "a+");
+	if (VLD_G(enable_logging)) {
+		VLD_G(logger) = fopen(VLD_G(log_path), "a+");	
+	}
 
 	return SUCCESS;
 }
@@ -220,7 +225,9 @@ PHP_RSHUTDOWN_FUNCTION(vld)
 	}
 	fflush(stderr);
 
-	fclose(VLD_G(logger));		// flushes too
+	if (VLD_G(enable_logging)) {
+		fclose(VLD_G(logger));		// flushes too
+	}	
 
 	return SUCCESS;
 }
@@ -251,37 +258,47 @@ void measure_end(struct timeval tm_start, char *name)
 	fprintf(stderr, "%s Took: %llu ms\n", name, t_diff);
 }
 
-int vld_printf(FILE *stream, const char* fmt, ...)
+int vld_printf(FILE *stream, const char *fmt, ...)
 {
-	char *message;
-	int len;
-	va_list args;
-	int i = 0, j = 0;
-	char *ptr;
-	const char EOL='\n';
-	TSRMLS_FETCH();
-	
-	va_start(args, fmt);
-	len = vspprintf(&message, 0, fmt, args);
-	va_end(args);
-	if (VLD_G(format)) {
-		ptr = message;
-		while (j < strlen(ptr)) {
-			if (!isspace(ptr[j]) || ptr[j] == EOL) {
-				ptr[i++] = ptr[j];
-			}
-			j++;
-		}
-		ptr[i] = 0;
+	if (stream != NULL)
+	{
+		char *message;
+		int len;
+		va_list args;
+		int i = 0, j = 0;
+		char *ptr;
+		const char EOL = '\n';
+		TSRMLS_FETCH();
 
-		fprintf(stream, "%s%s", VLD_G(col_sep), ptr);
-	} else {
-		fprintf(stream, "%s", message);
+		va_start(args, fmt);
+		len = vspprintf(&message, 0, fmt, args);
+		va_end(args);
+		if (VLD_G(format))
+		{
+			ptr = message;
+			while (j < strlen(ptr))
+			{
+				if (!isspace(ptr[j]) || ptr[j] == EOL)
+				{
+					ptr[i++] = ptr[j];
+				}
+				j++;
+			}
+			ptr[i] = 0;
+
+			fprintf(stream, "%s%s", VLD_G(col_sep), ptr);
+		}
+		else
+		{
+			fprintf(stream, "%s", message);
+		}
+
+		efree(message);
+
+		return len;
 	}
 
-	efree(message);
-	
-	return len;
+	return 0;
 }
 
 static int vld_check_fe (zend_op_array *fe, zend_bool *have_fe TSRMLS_DC)
@@ -384,7 +401,7 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 	if (op_array) {
 		struct timeval tm_start = measure_start();
 		vld_dump_oparray (op_array TSRMLS_CC);
-		measure_end(tm_start, "vld_dump_oparray1");
+		measure_end(tm_start, file_handle->filename);
 	}
 
 	// I think Zend compiles function and class definitions and stores them to compiler globals (CG) when compiling the overall scripts.
@@ -411,7 +428,7 @@ static zend_op_array *vld_compile_string(zval *source_string, char *filename TSR
 	if (op_array) {
 		struct timeval tm_start = measure_start();
 		vld_dump_oparray (op_array TSRMLS_CC);
-		measure_end(tm_start, "vld_dump_oparray2");
+		measure_end(tm_start, filename);
 
 		zend_hash_apply_with_arguments (CG(function_table) APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe, 0);
 		zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle TSRMLS_CC);
@@ -450,8 +467,7 @@ static void vld_execute2(zend_op_array *op_array TSRMLS_DC)
 		zlog_debug(EG(vldcat), "SEND_START_OF_SCRIPT: %s - %s - %s", filename, scopename, funcname);
 		send_start_of_script(UC(ucphp_request), filename, scopename, funcname);
 
-		// zlog_debug(EG(vldcat), "SEND_EXEUTED_OPCODE_LIST_AND_MAKE_NEW1");
-		UC(current_executed_opcode_list) = new_executed_opcode_list(UC(ucphp_request)); // send_executed_opcode_list_and_make_new(UC(current_executed_opcode_list));
+		UC(current_executed_opcode_list) = new_executed_opcode_list(UC(ucphp_request));
 
 		zlog_debug(EG(vldcat), "START EXECUTING OPCODES!");
 #if PHP_VERSION_ID >= 50500
@@ -460,17 +476,14 @@ static void vld_execute2(zend_op_array *op_array TSRMLS_DC)
 		old_execute (op_array TSRMLS_CC);
 #endif	
 
-		// zlog_debug(EG(vldcat), "SEND_EXECUTED_OPCODE_LIST_AND_MAKE_NEW2");		// seems to be expensive point here...
-		// UC(current_executed_opcode_list) = send_executed_opcode_list_and_make_new(UC(current_executed_opcode_list));
-		// UC(current_executed_opcode_list) = new_executed_opcode_list(UC(ucphp_request));
-
 		zlog_debug(EG(vldcat), "SEND_END_OF_SCRIPT: %s - %s - %s", filename, scopename, funcname);
 		send_end_of_script(UC(ucphp_request), filename, scopename, funcname);
 
 		efree(filename);
-		if (scopename) efree(scopename);
-		if (funcname) efree(funcname);
-
+		if (scopename)
+			efree(scopename);
+		if (funcname)
+			efree(funcname);
 	} else {
 #if PHP_VERSION_ID >= 50500
 		old_execute_ex(execute_data TSRMLS_CC);
