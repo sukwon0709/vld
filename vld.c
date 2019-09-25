@@ -243,21 +243,6 @@ PHP_MINFO_FUNCTION(vld)
 
 }
 
-struct timeval measure_start()
-{
-	struct timeval tm;
-	gettimeofday(&tm, NULL);
-	return tm;
-}
-
-void measure_end(struct timeval tm_start, char *name)
-{
-	struct timeval tm_end;
-	gettimeofday(&tm_end, NULL);
-	unsigned long long t_diff = 1000 * (tm_end.tv_sec - tm_start.tv_sec) + (tm_end.tv_usec - tm_start.tv_usec) / 1000;
-	fprintf(stderr, "%s Took: %llu ms\n", name, t_diff);
-}
-
 int vld_printf(FILE *stream, const char *fmt, ...)
 {
 	if (stream != NULL)
@@ -399,9 +384,7 @@ static zend_op_array *vld_compile_file(zend_file_handle *file_handle, int type T
 		fprintf(VLD_G(path_dump_file), "subgraph cluster_file_%08x { label=\"file %s\";\n", op_array, op_array->filename ? ZSTRING_VALUE(op_array->filename) : "__main");
 	}
 	if (op_array) {
-		struct timeval tm_start = measure_start();
 		vld_dump_oparray (op_array TSRMLS_CC);
-		measure_end(tm_start, file_handle->filename);
 	}
 
 	// I think Zend compiles function and class definitions and stores them to compiler globals (CG) when compiling the overall scripts.
@@ -426,9 +409,7 @@ static zend_op_array *vld_compile_string(zval *source_string, char *filename TSR
 	op_array = old_compile_string (source_string, filename TSRMLS_CC);
 
 	if (op_array) {
-		struct timeval tm_start = measure_start();
 		vld_dump_oparray (op_array TSRMLS_CC);
-		measure_end(tm_start, filename);
 
 		zend_hash_apply_with_arguments (CG(function_table) APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe, 0);
 		zend_hash_apply (CG(class_table), (apply_func_t) vld_dump_cle TSRMLS_CC);
@@ -460,9 +441,9 @@ static void vld_execute2(zend_op_array *op_array TSRMLS_DC)
 #endif
 {
 	if (UC(concolic_enabled)) {
-		const char *filename = estrdup(execute_data->op_array->filename);
-		const char *scopename = execute_data->op_array->scope ? estrdup(execute_data->op_array->scope->name): NULL;
-		const char *funcname = execute_data->op_array->function_name ? estrdup(execute_data->op_array->function_name) : NULL;
+		char *filename = estrdup(execute_data->op_array->filename);
+		char *scopename = execute_data->op_array->scope ? estrdup(execute_data->op_array->scope->name): NULL;
+		char *funcname = execute_data->op_array->function_name ? estrdup(execute_data->op_array->function_name) : NULL;
 
 		zlog_debug(EG(vldcat), "SEND_START_OF_SCRIPT: %s - %s - %s", filename, scopename, funcname);
 		send_start_of_script(UC(ucphp_request), filename, scopename, funcname);

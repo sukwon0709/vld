@@ -228,7 +228,7 @@ void vld_branch_find_paths(vld_branch_info *branch_info)
 void vld_branch_info_dump(zend_op_array *opa, vld_branch_info *branch_info TSRMLS_DC)
 {
 	unsigned int i, j;
-	char *fname = opa->function_name ? ZSTRING_VALUE(opa->function_name) : "__main";
+	const char *fname = opa->function_name ? ZSTRING_VALUE(opa->function_name) : "__main";
 
 	if (VLD_G(path_dump_file)) {
 		fprintf(VLD_G(path_dump_file), "subgraph cluster_%08x {\n\tlabel=\"%s\";\n\tgraph [rankdir=\"LR\"];\n\tnode [shape = record];\n", opa, fname, fname);
