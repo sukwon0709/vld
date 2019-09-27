@@ -306,11 +306,11 @@ static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list
 
 		new_str = php_url_encode(ZHASHKEYSTR(hash_key), ZHASHKEYLEN(hash_key) - 1 PHP_URLENCODE_NEW_LEN(new_len));
 		VLD_PRINTF1(0, "FUNCTION %s:\n", ZSTRING_VALUE(new_str));
-		if (!check_function_entry(ZSTRING_VALUE(new_str), &VLD_G(function_table))) {
+		// if (!check_function_entry(ZSTRING_VALUE(new_str), &VLD_G(function_table))) {
 			VLD_PRINTF1(0, "FUNCTION %s IS NEW\n", ZSTRING_VALUE(new_str));
 			vld_dump_oparray(fe TSRMLS_CC);
-			add_function_entry(ZSTRING_VALUE(new_str), &VLD_G(function_table));
-		}
+			// add_function_entry(ZSTRING_VALUE(new_str), &VLD_G(function_table));
+		// }
 		VLD_PRINTF1(0, "End of FUNCTION %s\n\n", ZSTRING_VALUE(new_str));
 		efree(new_str);
 	}
