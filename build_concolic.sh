@@ -14,9 +14,9 @@ XXHASH_LDFLAGS="-L${XXHASH_PATH}/lib"
 XXHASH_LIBS="-Wl,-rpath,${XXHASH_PATH}/lib -L${XXHASH_PATH}/lib -lxxhash"
 
 UCPHP_PATH=/home/soh/git/uc-php
-UCPHP_CFLAGS="-I${UCPHP_PATH}/includes -I${STACK_PATH}/lib/ghc-8.6.4/include"
+UCPHP_CFLAGS="-I${UCPHP_PATH}/dependencies/uc-php-ffi/includes -I${STACK_PATH}/lib/ghc-8.6.4/include"
 UCPHP_LDFLAGS="-L${UCPHP_PATH} -L${STACK_PATH}/lib/ghc-8.6.4/rts"
-UCPHP_LIBS="-L${UCPHP_PATH} -luc_php -Wl,-rpath,/home/soh/git/uc-php"
+UCPHP_LIBS="-L${UCPHP_PATH} -luc_php_ffi -Wl,-rpath,/home/soh/git/uc-php"
 HASKELL_LIBS="-L${STACK_PATH}/lib/ghc-8.6.4/rts -lHSrts-ghc8.6.4 -Wl,-rpath,${STACK_PATH}/lib/ghc-8.6.4/rts"
 
 PROTOBUF_CLIENT_PATH=/home/soh/git/uc-php/dependencies/uc-php-proto-client
