@@ -5,27 +5,32 @@ STACK_PATH=/home/soh/.stack/programs/x86_64-linux/ghc-8.6.4
 
 ZLOG_PATH=/home/soh/zlog
 ZLOG_CFLAGS="-I${ZLOG_PATH}/include"
-ZLOG_LDFLAGS="-L${ZLOG_PAHT}/lib"
-ZLOG_LIBS="-Wl,-rpath,${ZLOG_PATH}/lib -L${ZLOG_PATH}/lib -lzlog -lpthread"
+ZLOG_LDFLAGS="-L${ZLOG_PATH}/lib"
+ZLOG_LIBS="${ZLOG_LDFLAGS} -lzlog -lpthread"
 
 XXHASH_PATH=/home/soh/xxHash
 XXHASH_CFLAGS="-I${XXHASH_PATH}/include"
 XXHASH_LDFLAGS="-L${XXHASH_PATH}/lib"
-XXHASH_LIBS="-Wl,-rpath,${XXHASH_PATH}/lib -L${XXHASH_PATH}/lib -lxxhash"
+XXHASH_LIBS="${XXHASH_LDFLAGS} -lxxhash"
 
 UCPHP_PATH=/home/soh/git/uc-php
 UCPHP_CFLAGS="-I${UCPHP_PATH}/dependencies/uc-php-ffi/includes -I${STACK_PATH}/lib/ghc-8.6.4/include"
-UCPHP_LDFLAGS="-L${UCPHP_PATH} -L${STACK_PATH}/lib/ghc-8.6.4/rts"
-UCPHP_LIBS="-L${UCPHP_PATH} -luc_php_ffi -Wl,-rpath,/home/soh/git/uc-php"
-HASKELL_LIBS="-L${STACK_PATH}/lib/ghc-8.6.4/rts -lHSrts-ghc8.6.4 -Wl,-rpath,${STACK_PATH}/lib/ghc-8.6.4/rts"
+UCPHP_LDFLAGS="-L${UCPHP_PATH} -L${STACK_PATH}/lib/ghc-8.6.4/rts -Wl,-rpath,${STACK_PATH}/lib/ghc-8.6.4/rts"
+UCPHP_LIBS="${UCPHP_LDFLAGS} -luc_php_ffi -lHSrts-ghc8.6.4"
 
 PROTOBUF_CLIENT_PATH=/home/soh/git/uc-php/dependencies/uc-php-proto-client
 PROTOBUF_CLIENT_CFLAGS="-I${PROTOBUF_CLIENT_PATH}/includes"
-PROTOBUF_CLIENT_LIBS="-L${PROTOBUF_CLIENT_PATH} -lucphp_proto_client -Wl,-rpath,${PROTOBUF_CLIENT_PATH} -lstdc++"
+PROTOBUF_CLIENT_LDFLAGS="-L${PROTOBUF_CLIENT_PATH}"
+PROTOBUF_CLIENT_LIBS="${PROTOBUF_CLIENT_LDFLAGS} -lprotobuf -lgrpc -lgrpc++ -lucphp_proto_client -lstdc++"
 
-CFLAGS="${HASKELL_CFLAGS} ${ZLOG_CFLAGS} ${XXHASH_CFLAGS} ${UCPHP_CFLAGS} ${PROTOBUF_CLIENT_CFLAGS} -DDISABLE_STRING_INTERNING -ggdb3 --coverage"
+MM_PATH=/home/soh/git/uc-php/dependencies/uc-php-mm
+MM_CFLAGS="-I${MM_PATH}"
+MM_LDFLAGS="-L${MM_PATH}"
+MM_LIBS="${MM_LDFLAGS} -lucphp_mm -lstdc++"
+
+CFLAGS="${ZLOG_CFLAGS} ${XXHASH_CFLAGS} ${UCPHP_CFLAGS} ${PROTOBUF_CLIENT_CFLAGS} ${MM_CFLAGS} -DDISABLE_STRING_INTERNING -ggdb3 --coverage"
 # CFLAGS="${HASKELL_CFLAGS} ${ZLOG_CFLAGS} ${XXHASH_CFLAGS} ${UCPHP_CFLAGS} ${PROTOBUF_CLIENT_CFLAGS} -DDISABLE_STRING_INTERNING -O2 --coverage"
-LDFLAGS="${HASKELL_LDFLAGS} ${ZLOG_LDFLAGS} ${XXHASH_LDFLAGS} ${UCPHP_LDFLAGS} --coverage"
-LIBS="${ZLOG_LIBS} ${XXHASH_LIBS} ${UCPHP_LIBS} ${HASKELL_LIBS}"
+LDFLAGS="${ZLOG_LDFLAGS} ${XXHASH_LDFLAGS} ${UCPHP_LDFLAGS} ${PROTOBUF_CLIENT_LDFLAGS} ${MM_LDFLAGS} --coverage"
+LIBS="${ZLOG_LIBS} ${XXHASH_LIBS} ${UCPHP_LIBS} ${PROTOBUF_CLIENT_LIBS} ${MM_LIBS}"
 
 ./configure --prefix=${PREFIX_PATH} --with-php-config=${PREFIX_PATH}/bin/php-config CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" LIBS="${LIBS}"
