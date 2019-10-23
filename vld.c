@@ -98,6 +98,22 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("vld.log_path",		   "/tmp/vld.log", PHP_INI_SYSTEM, OnUpdateString, log_path, zend_vld_globals, vld_globals)
 PHP_INI_END()
  
+int vld_str_end(const char *s, const char *t)
+{
+    int diff = strlen(s) - strlen(t);
+    return diff > 0 && 0 == strcmp(&s[diff], t);
+}
+
+int VLD_IS_CONCOLIC()
+{
+	// turn concolic ex off for login scripts.
+	if (strcmp(UC(login_script_name), "") != 0 && (vld_str_end(UC(start_script_name), UC(login_script_name)) || vld_str_end(UC(current_script_name), "start_xdebug.php")))
+	{
+		return 0;
+	}
+	return UC(concolic_enabled) == 1;
+}
+
 static void vld_init_globals(zend_vld_globals *vld_globals)
 {
 	vld_globals->active       = 0;
@@ -304,15 +320,9 @@ static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list
 		ZVAL_VALUE_STRING_TYPE *new_str;
 		int new_len;
 
-		new_str = php_url_encode(ZHASHKEYSTR(hash_key), ZHASHKEYLEN(hash_key) - 1 PHP_URLENCODE_NEW_LEN(new_len));
-		VLD_PRINTF1(0, "FUNCTION %s:\n", ZSTRING_VALUE(new_str));
-		// if (!check_function_entry(ZSTRING_VALUE(new_str), &VLD_G(function_table))) {
-			VLD_PRINTF1(0, "FUNCTION %s IS NEW\n", ZSTRING_VALUE(new_str));
-			vld_dump_oparray(fe TSRMLS_CC);
-			// add_function_entry(ZSTRING_VALUE(new_str), &VLD_G(function_table));
-		// }
-		VLD_PRINTF1(0, "End of FUNCTION %s\n\n", ZSTRING_VALUE(new_str));
-		efree(new_str);
+		// new_str = php_url_encode(ZHASHKEYSTR(hash_key), ZHASHKEYLEN(hash_key) - 1 PHP_URLENCODE_NEW_LEN(new_len));
+		vld_dump_oparray(fe TSRMLS_CC);
+		// efree(new_str);
 	}
 
 	return ZEND_HASH_APPLY_KEEP;
@@ -340,11 +350,7 @@ static int vld_dump_cle (zend_class_entry *class_entry TSRMLS_DC)
 
 		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) vld_check_fe, (void *)&have_fe TSRMLS_CC);
 		if (have_fe) {
-			VLD_PRINTF1(0, "Class %s:\n", ZSTRING_VALUE(ce->name));
 			zend_hash_apply_with_arguments(&ce->function_table APPLY_TSRMLS_CC, (apply_func_args_t) vld_dump_fe, 0);
-			VLD_PRINTF1(0, "End of class %s.\n\n", ZSTRING_VALUE(ce->name));
-		} else {
-			VLD_PRINTF1(0, "Class %s: [no user functions]\n", ZSTRING_VALUE(ce->name));
 		}
 
 		if (VLD_G(path_dump_file)) {
@@ -440,6 +446,7 @@ static void vld_execute2_ex(zend_execute_data *execute_data TSRMLS_DC)
 static void vld_execute2(zend_op_array *op_array TSRMLS_DC)
 #endif
 {
+	// if (VLD_IS_CONCOLIC()) {
 	if (UC(concolic_enabled)) {
 		char *filename = estrdup(execute_data->op_array->filename);
 		char *scopename = execute_data->op_array->scope ? estrdup(execute_data->op_array->scope->name): NULL;
