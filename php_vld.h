@@ -16,6 +16,7 @@
 
 #include "php.h"
 #include "UCPHPCClient.h"
+#include "map.h"
 
 extern zend_module_entry vld_module_entry;
 #define phpext_vld_ptr &vld_module_entry
@@ -53,7 +54,7 @@ ZEND_BEGIN_MODULE_GLOBALS(vld)
 	FILE *serialize_file;
 	int network_serialize;								// sends opcodes to remote server for analysis
 	char *network_serialize_name;						// remote server host:port
-	HashTable function_table;							// records all function names that are parsed
+	void *seen_function_set;
 
 	int enable_logging;								// enables logging
 	char *log_path;										// log path

@@ -22,9 +22,9 @@
 #include "php_vld.h"
 #include "srm_oparray.h"
 #include "php_globals.h"
-#include "function_table.h"
 
 #include "zlog.h"
+#include "map.h"
 
 #if PHP_VERSION_ID >= 50300
 # define APPLY_TSRMLS_CC TSRMLS_CC
@@ -133,8 +133,7 @@ static void vld_init_globals(zend_vld_globals *vld_globals)
 	vld_globals->enable_logging = 0;
 	vld_globals->log_path = NULL;
 	vld_globals->logger = NULL;
-	
-	ZEND_INIT_SYMTABLE_EX(&vld_globals->function_table, 2, 1);
+	vld_globals->seen_function_set = init_string_set();
 }
 
 PHP_MINIT_FUNCTION(vld)
@@ -160,8 +159,7 @@ PHP_MSHUTDOWN_FUNCTION(vld)
 	zend_execute        = old_execute;
 #endif
 
-	zend_hash_destroy(&VLD_G(function_table));
-	//FREE_HASHTABLE(&VLD_G(function_table));
+	destroy_string_set(VLD_G(seen_function_set));
 
 	return SUCCESS;
 }
@@ -320,9 +318,10 @@ static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list
 		ZVAL_VALUE_STRING_TYPE *new_str;
 		int new_len;
 
-		// new_str = php_url_encode(ZHASHKEYSTR(hash_key), ZHASHKEYLEN(hash_key) - 1 PHP_URLENCODE_NEW_LEN(new_len));
-		vld_dump_oparray(fe TSRMLS_CC);
-		// efree(new_str);
+		if (!is_function_present(VLD_G(seen_function_set), fe->filename, fe->scope ? fe->scope->name : "", fe->function_name)) {
+			vld_dump_oparray(fe TSRMLS_CC);
+			add_function_to_set(VLD_G(seen_function_set), fe->filename, fe->scope ? fe->scope->name : "", fe->function_name);
+		}		
 	}
 
 	return ZEND_HASH_APPLY_KEEP;
