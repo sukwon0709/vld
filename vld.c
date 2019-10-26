@@ -133,7 +133,8 @@ static void vld_init_globals(zend_vld_globals *vld_globals)
 	vld_globals->enable_logging = 0;
 	vld_globals->log_path = NULL;
 	vld_globals->logger = NULL;
-	vld_globals->seen_function_set = init_string_set();
+	
+	init_ucphp_util();
 }
 
 PHP_MINIT_FUNCTION(vld)
@@ -158,8 +159,6 @@ PHP_MSHUTDOWN_FUNCTION(vld)
 #else
 	zend_execute        = old_execute;
 #endif
-
-	destroy_string_set(VLD_G(seen_function_set));
 
 	return SUCCESS;
 }
@@ -318,9 +317,9 @@ static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list
 		ZVAL_VALUE_STRING_TYPE *new_str;
 		int new_len;
 
-		if (!is_function_present(VLD_G(seen_function_set), fe->filename, fe->scope ? fe->scope->name : "", fe->function_name)) {
+		if (!is_function_present(fe->filename, fe->scope ? fe->scope->name : "", fe->function_name)) {
 			vld_dump_oparray(fe TSRMLS_CC);
-			add_function_to_set(VLD_G(seen_function_set), fe->filename, fe->scope ? fe->scope->name : "", fe->function_name);
+			add_function_to_set(fe->filename, fe->scope ? fe->scope->name : "", fe->function_name);
 		}		
 	}
 

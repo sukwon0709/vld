@@ -54,7 +54,6 @@ ZEND_BEGIN_MODULE_GLOBALS(vld)
 	FILE *serialize_file;
 	int network_serialize;								// sends opcodes to remote server for analysis
 	char *network_serialize_name;						// remote server host:port
-	void *seen_function_set;
 
 	int enable_logging;								// enables logging
 	char *log_path;										// log path
