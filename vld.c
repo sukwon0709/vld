@@ -317,10 +317,10 @@ static int vld_dump_fe (zend_op_array *fe APPLY_TSRMLS_DC, int num_args, va_list
 		ZVAL_VALUE_STRING_TYPE *new_str;
 		int new_len;
 
-		if (!is_function_present(fe->filename, fe->scope ? fe->scope->name : "", fe->function_name)) {
+		//if (!is_function_present(fe->filename, fe->scope ? fe->scope->name : "", fe->function_name)) {
 			vld_dump_oparray(fe TSRMLS_CC);
-			add_function_to_set(fe->filename, fe->scope ? fe->scope->name : "", fe->function_name);
-		}		
+		//	add_function_to_set(fe->filename, fe->scope ? fe->scope->name : "", fe->function_name);
+		//}		
 	}
 
 	return ZEND_HASH_APPLY_KEEP;
