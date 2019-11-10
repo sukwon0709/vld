@@ -55,3 +55,6 @@ tags
 .svn
 /*~
 /debugclient/*.o
+
+.vscode
+*.pb.*
