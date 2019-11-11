@@ -86,22 +86,25 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("vld.save_dir",     "/tmp", PHP_INI_SYSTEM, OnUpdateString, save_dir, zend_vld_globals, vld_globals)
 	STD_PHP_INI_ENTRY("vld.save_paths",   "0", PHP_INI_SYSTEM, OnUpdateBool, save_paths,   zend_vld_globals, vld_globals)
 	STD_PHP_INI_ENTRY("vld.dump_paths",   "1", PHP_INI_SYSTEM, OnUpdateBool, dump_paths,   zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.dump_proto_path",	"/tmp/proto.dump", PHP_INI_SYSTEM, OnUpdateString, dump_proto_path, zend_vld_globals, vld_globals)
+	STD_PHP_INI_ENTRY("vld.dump_proto",			"0", PHP_INI_SYSTEM, OnUpdateBool, dump_proto, zend_vld_globals, vld_globals)
 PHP_INI_END()
- 
-static void vld_init_globals(zend_vld_globals *vld_globals)
-{
-	vld_globals->active       = 0;
-	vld_globals->skip_prepend = 0;
-	vld_globals->skip_append  = 0;
-	vld_globals->execute      = 1;
-	vld_globals->format       = 0;
-	vld_globals->col_sep	  = "\t";
-	vld_globals->path_dump_file = NULL;
-	vld_globals->dump_paths   = 1;
-	vld_globals->save_paths   = 0;
-	vld_globals->verbosity    = 1;
-}
 
+static void
+vld_init_globals(zend_vld_globals* vld_globals)
+{
+  vld_globals->active = 0;
+  vld_globals->skip_prepend = 0;
+  vld_globals->skip_append = 0;
+  vld_globals->execute = 1;
+  vld_globals->format = 0;
+  vld_globals->col_sep = "\t";
+  vld_globals->path_dump_file = NULL;
+  vld_globals->dump_paths = 1;
+  vld_globals->save_paths = 0;
+  vld_globals->dump_proto = 0;
+  vld_globals->verbosity = 1;
+}
 
 PHP_MINIT_FUNCTION(vld)
 {

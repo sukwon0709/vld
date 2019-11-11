@@ -1,6 +1,6 @@
-#include "UCPHPCClient.h"
+#include "dump_protobuf.h"
 
-#include "branchinfo.h"
+ZEND_EXTERN_MODULE_GLOBALS(vld)
 
 BranchInfo*
 ucphp_dump_branch(vld_branch_info* branch_info)
@@ -53,4 +53,11 @@ ucphp_dump_opcodes(zend_op_array* opa)
   set_opcode_list_location(opcode_list_proto, filename, scopename, funcname);
 
   return opcode_list_proto;
+}
+
+void
+ucphp_dump(OpcodeList* opcode_list, BranchInfo* branch_info TSRMLS_DC)
+{
+  set_branch_info(opcode_list, branch_info);
+  write_opcode_list(VLD_G(dump_proto_path), opcode_list);
 }

@@ -21,6 +21,8 @@
 #include "set.h"
 #include "php_vld.h"
 
+#include "dump_protobuf.h"
+
 ZEND_EXTERN_MODULE_GLOBALS(vld)
 
 /* Input zend_compile.h
@@ -759,6 +761,12 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 		vld_branch_post_process(opa, branch_info);
 		vld_branch_find_paths(branch_info);
 		vld_branch_info_dump(opa, branch_info TSRMLS_CC);
+	}
+
+	if (VLD_G(dump_proto)) {
+		BranchInfo* branch_info_proto = ucphp_dump_branch(branch_info);
+		OpcodeList *opcode_list_proto = ucphp_dump_opcodes(opa);
+		ucphp_dump(opcode_list_proto, branch_info_proto);
 	}
 
 	vld_set_free(set);
