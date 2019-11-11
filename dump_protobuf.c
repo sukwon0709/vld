@@ -46,9 +46,10 @@ ucphp_dump_opcodes(zend_op_array* opa)
     }
   }
 
-  const char* filename = ZSTRING_VALUE(opa->filename);
+  const char* filename = opa->filename ? ZSTRING_VALUE(opa->filename) : "";
   const char* scopename = opa->scope ? ZSTRING_VALUE(opa->scope->name) : "";
-  const char* funcname = ZSTRING_VALUE(opa->function_name);
+  const char* funcname =
+    opa->function_name ? ZSTRING_VALUE(opa->function_name) : "";
 
   set_opcode_list_location(opcode_list_proto, filename, scopename, funcname);
 
