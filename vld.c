@@ -103,6 +103,7 @@ vld_init_globals(zend_vld_globals* vld_globals)
   vld_globals->dump_paths = 1;
   vld_globals->save_paths = 0;
   vld_globals->dump_proto = 0;
+	vld_globals->opcode_dump = NULL;
   vld_globals->verbosity = 1;
 }
 
@@ -160,6 +161,10 @@ PHP_RINIT_FUNCTION(vld)
 		}
 	}
 
+	if (VLD_G(dump_proto)) {
+		VLD_G(opcode_dump) = new_opcode_dump();
+	}
+
 	if (VLD_G(save_paths)) {
 		char *filename;
 
@@ -186,6 +191,10 @@ PHP_RSHUTDOWN_FUNCTION(vld)
 #else
 	zend_execute      = old_execute;
 #endif
+
+	if (VLD_G(dump_proto)) {
+		ucphp_dump(TSRMLS_C);
+	}
 
 	if (VLD_G(path_dump_file)) {
 		fprintf(VLD_G(path_dump_file), "}\n");

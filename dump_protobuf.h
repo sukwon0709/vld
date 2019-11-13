@@ -12,7 +12,6 @@ ucphp_dump_branch(vld_branch_info* branch_info);
 OpcodeList*
 ucphp_dump_opcodes(zend_op_array* opa);
 
-void
-ucphp_dump(OpcodeList* opcode_list, BranchInfo* branch_info TSRMLS_DC);
+void ucphp_dump(TSRMLS_D);
 
 #endif // DUMP_PROTOBUF_H_

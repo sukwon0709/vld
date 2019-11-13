@@ -15,6 +15,7 @@
 #define PHP_VLD_H
 
 #include "php.h"
+#include "Opcode.h"
 
 extern zend_module_entry vld_module_entry;
 #define phpext_vld_ptr &vld_module_entry
@@ -49,6 +50,7 @@ ZEND_BEGIN_MODULE_GLOBALS(vld)
 	int dump_paths;
 	int dump_proto;							// dumps protobuf data on opcodes and branches
 	char *dump_proto_path;			// path for protobuf dumps
+	OpcodeDump *opcode_dump;
 ZEND_END_MODULE_GLOBALS(vld) 
 
 int vld_printf(FILE *stream, const char* fmt, ...);

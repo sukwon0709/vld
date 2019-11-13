@@ -766,7 +766,7 @@ void vld_dump_oparray(zend_op_array *opa TSRMLS_DC)
 	if (VLD_G(dump_proto)) {
 		BranchInfo* branch_info_proto = ucphp_dump_branch(branch_info);
 		OpcodeList *opcode_list_proto = ucphp_dump_opcodes(opa);
-		ucphp_dump(opcode_list_proto, branch_info_proto);
+		set_branch_info(opcode_list_proto, branch_info_proto);		
 	}
 
 	vld_set_free(set);

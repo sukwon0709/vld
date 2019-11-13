@@ -34,7 +34,7 @@ ucphp_dump_branch(vld_branch_info* branch_info)
 OpcodeList*
 ucphp_dump_opcodes(zend_op_array* opa)
 {
-  OpcodeList* opcode_list_proto = new_opcode_list();
+  OpcodeList* opcode_list_proto = add_new_opcode_list(VLD_G(opcode_dump));
 
   for (int i = 0; i < opa->last; i++) {
     const zend_op op = opa->opcodes[i];
@@ -56,9 +56,7 @@ ucphp_dump_opcodes(zend_op_array* opa)
   return opcode_list_proto;
 }
 
-void
-ucphp_dump(OpcodeList* opcode_list, BranchInfo* branch_info TSRMLS_DC)
+void ucphp_dump(TSRMLS_D)
 {
-  set_branch_info(opcode_list, branch_info);
-  write_opcode_list(VLD_G(dump_proto_path), opcode_list);
+  write_opcode_list(VLD_G(dump_proto_path), VLD_G(opcode_dump));
 }
