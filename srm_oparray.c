@@ -900,85 +900,139 @@ void vld_analyse_oparray(zend_op_array *opa, vld_set *set, vld_branch_info *bran
 	branch_info->branches[opa->last-1].start_lineno = opa->opcodes[opa->last-1].lineno;
 }
 
-void vld_analyse_branch(zend_op_array *opa, unsigned int position, vld_set *set, vld_branch_info *branch_info TSRMLS_DC)
+void
+vld_analyse_branch(zend_op_array* opa,
+                   unsigned int position,
+                   vld_set* set,
+                   vld_branch_info* branch_info TSRMLS_DC)
 {
-	long jump_pos1 = VLD_JMP_NOT_SET;
-	long jump_pos2 = VLD_JMP_NOT_SET;
+  long jump_pos1 = VLD_JMP_NOT_SET;
+  long jump_pos2 = VLD_JMP_NOT_SET;
 
-	if (VLD_G(format)) {
-		VLD_PRINT2(1, "Branch analysis from position:%s%d\n", VLD_G(col_sep),position);
-	} else {
-		VLD_PRINT1(1, "Branch analysis from position: %d\n", position);
-	}
+  if (VLD_G(format)) {
+    VLD_PRINT2(
+      1, "Branch analysis from position:%s%d\n", VLD_G(col_sep), position);
+  } else {
+    VLD_PRINT1(1, "Branch analysis from position: %d\n", position);
+  }
 
-	vld_set_add(branch_info->starts, position);
-	branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
+  vld_set_add(branch_info->starts, position);
+  branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
 
-	/* First we see if the branch has been visited, if so we bail out. */
-	if (vld_set_in(set, position)) {
-		return;
-	}
-	/* Loop over the opcodes until the end of the array, or until a jump point has been found */
-	VLD_PRINT1(2, "Add %d\n", position);
-	vld_set_add(set, position);
-	while (position < opa->last) {
-		jump_pos1 = VLD_JMP_NOT_SET;
-		jump_pos2 = VLD_JMP_NOT_SET;
+  /* First we see if the branch has been visited, if so we bail out. */
+  if (vld_set_in(set, position)) {
+    return;
+  }
+  /* Loop over the opcodes until the end of the array, or until a jump point has
+   * been found */
+  VLD_PRINT1(2, "Add %d\n", position);
+  vld_set_add(set, position);
+  while (position < opa->last) {
+    jump_pos1 = VLD_JMP_NOT_SET;
+    jump_pos2 = VLD_JMP_NOT_SET;
 
-		/* See if we have a jump instruction */
-		if (vld_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
-			VLD_PRINT1(1, "Jump found. Position 1 = %d", jump_pos1);
-			if (jump_pos2 != VLD_JMP_NOT_SET) {
-				VLD_PRINT1(1, ", Position 2 = %d\n", jump_pos2);
-			} else {
-				VLD_PRINT(1, "\n");
-			}
-			if (jump_pos1 == VLD_JMP_EXIT || jump_pos1 >= 0) {
-				vld_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 0, jump_pos1);
-				if (jump_pos1 != VLD_JMP_EXIT) {
-					vld_analyse_branch(opa, jump_pos1, set, branch_info TSRMLS_CC);
-				}
-			}
-			if (jump_pos2 == VLD_JMP_EXIT || jump_pos2 >= 0) {
-				vld_branch_info_update(branch_info, position, opa->opcodes[position].lineno, 1, jump_pos2);
-				if (jump_pos2 != VLD_JMP_EXIT) {
-					vld_analyse_branch(opa, jump_pos2, set, branch_info TSRMLS_CC);
-				}
-			}
-			break;
-		}
+    /* See if we have a jump instruction */
+    if (vld_find_jump(opa, position, &jump_pos1, &jump_pos2)) {
+      VLD_PRINT1(1, "Jump found. Position 1 = %d", jump_pos1);
+      if (jump_pos2 != VLD_JMP_NOT_SET) {
+        VLD_PRINT1(1, ", Position 2 = %d\n", jump_pos2);
+      } else {
+        VLD_PRINT(1, "\n");
+      }
+      if (jump_pos1 == VLD_JMP_EXIT || jump_pos1 >= 0) {
+        vld_branch_info_update(
+          branch_info, position, opa->opcodes[position].lineno, 0, jump_pos1);
+        if (jump_pos1 != VLD_JMP_EXIT) {
+          vld_analyse_branch(opa, jump_pos1, set, branch_info TSRMLS_CC);
+        }
+      }
+      if (jump_pos2 == VLD_JMP_EXIT || jump_pos2 >= 0) {
+        vld_branch_info_update(
+          branch_info, position, opa->opcodes[position].lineno, 1, jump_pos2);
+        if (jump_pos2 != VLD_JMP_EXIT) {
+          vld_analyse_branch(opa, jump_pos2, set, branch_info TSRMLS_CC);
+        }
+      }
+      break;
+    }
+
+    /**
+     * Detects if next opcode is INCLUDE or FCALL.
+     * Make next opcode new branches and connect current branch to the next
+     * branches.
+     */
+    if (position + 1 < opa->last) {
+      if (opa->opcodes[position + 1].opcode == ZEND_INCLUDE_OR_EVAL) {
+        VLD_PRINT1(1, "Include found at next posision %d\n", position + 1);
+        vld_branch_info_update(branch_info,
+                               position,
+                               opa->opcodes[position].lineno,
+                               0,
+                               position + 1);
+        vld_analyse_branch(opa, position + 1, set, branch_info TSRMLS_CC);
+      } else if (opa->opcodes[position + 1].opcode == ZEND_DO_FCALL ||
+                 opa->opcodes[position + 1].opcode == ZEND_DO_FCALL_BY_NAME) {
+        VLD_PRINT1(
+          1, "Function call found at next posision %d\n", position + 1);
+        vld_branch_info_update(branch_info,
+                               position,
+                               opa->opcodes[position].lineno,
+                               0,
+                               position + 1);
+        vld_analyse_branch(opa, position + 1, set, branch_info TSRMLS_CC);
+      }
+    }
+
+    /**
+     * Detects if current opcode is INCLUDE or FCALL.
+     * Connect current branch to the next branches.
+     */
+    if (opa->opcodes[position].opcode == ZEND_INCLUDE_OR_EVAL) {
+      VLD_PRINT1(1, "Returning from include at %d\n", position);
+      vld_branch_info_update(
+        branch_info, position, opa->opcodes[position].lineno, 0, position + 1);
+      vld_analyse_branch(opa, position + 1, set, branch_info TSRMLS_CC);
+    } else if (opa->opcodes[position].opcode == ZEND_DO_FCALL ||
+               opa->opcodes[position].opcode == ZEND_DO_FCALL_BY_NAME) {
+      VLD_PRINT1(1, "Returning from function call at %d\n", position);
+      vld_branch_info_update(
+        branch_info, position, opa->opcodes[position].lineno, 0, position + 1);
+      vld_analyse_branch(opa, position + 1, set, branch_info TSRMLS_CC);
+    }
+
 #ifdef ZEND_ENGINE_2
-		/* See if we have a throw instruction */
-		if (opa->opcodes[position].opcode == ZEND_THROW) {
-			VLD_PRINT1(1, "Throw found at %d\n", position);
-			vld_set_add(branch_info->ends, position);
-			branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
-			break;
-		}
+    /* See if we have a throw instruction */
+    if (opa->opcodes[position].opcode == ZEND_THROW) {
+      VLD_PRINT1(1, "Throw found at %d\n", position);
+      vld_set_add(branch_info->ends, position);
+      branch_info->branches[position].start_lineno =
+        opa->opcodes[position].lineno;
+      break;
+    }
 #endif
-		/* See if we have an exit instruction */
-		if (opa->opcodes[position].opcode == ZEND_EXIT) {
-			VLD_PRINT(1, "Exit found\n");
-			vld_set_add(branch_info->ends, position);
-			branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
-			break;
-		}
-		/* See if we have a return instruction */
-		if (
-			opa->opcodes[position].opcode == ZEND_RETURN
+    /* See if we have an exit instruction */
+    if (opa->opcodes[position].opcode == ZEND_EXIT) {
+      VLD_PRINT(1, "Exit found\n");
+      vld_set_add(branch_info->ends, position);
+      branch_info->branches[position].start_lineno =
+        opa->opcodes[position].lineno;
+      break;
+    }
+    /* See if we have a return instruction */
+    if (opa->opcodes[position].opcode == ZEND_RETURN
 #if PHP_VERSION_ID >= 50400
-			|| opa->opcodes[position].opcode == ZEND_RETURN_BY_REF
+        || opa->opcodes[position].opcode == ZEND_RETURN_BY_REF
 #endif
-		) {
-			VLD_PRINT(1, "Return found\n");
-			vld_set_add(branch_info->ends, position);
-			branch_info->branches[position].start_lineno = opa->opcodes[position].lineno;
-			break;
-		}
+    ) {
+      VLD_PRINT(1, "Return found\n");
+      vld_set_add(branch_info->ends, position);
+      branch_info->branches[position].start_lineno =
+        opa->opcodes[position].lineno;
+      break;
+    }
 
-		position++;
-		VLD_PRINT1(2, "Add %d\n", position);
-		vld_set_add(set, position);
-	}
+    position++;
+    VLD_PRINT1(2, "Add %d\n", position);
+    vld_set_add(set, position);
+  }
 }
-
