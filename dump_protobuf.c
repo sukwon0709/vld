@@ -58,5 +58,5 @@ ucphp_dump_opcodes(zend_op_array* opa)
 
 void ucphp_dump(TSRMLS_D)
 {
-  write_opcode_list(VLD_G(dump_proto_path), VLD_G(opcode_dump));
+  write_opcode_dump(VLD_G(dump_proto_path), VLD_G(opcode_dump));
 }

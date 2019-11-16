@@ -22,6 +22,7 @@
 #include "php_vld.h"
 #include "srm_oparray.h"
 #include "php_globals.h"
+#include "dump_protobuf.h"
 
 #if PHP_VERSION_ID >= 50300
 # define APPLY_TSRMLS_CC TSRMLS_CC
