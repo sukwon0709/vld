@@ -1,7 +1,8 @@
 #!/bin/bash
 
 PREFIX_PATH=/home/soh/concolic_php
-STACK_PATH=/home/soh/.stack/programs/x86_64-linux/ghc-8.6.4
+STACK_VERSION=8.6.5
+STACK_PATH="/home/soh/.stack/programs/x86_64-linux/ghc-${STACK_VERSION}"
 
 ZLOG_PATH=/home/soh/zlog
 ZLOG_CFLAGS="-I${ZLOG_PATH}/include"
@@ -14,9 +15,9 @@ XXHASH_LDFLAGS="-L${XXHASH_PATH}/lib"
 XXHASH_LIBS="${XXHASH_LDFLAGS} -lxxhash"
 
 UCPHP_PATH=/home/soh/git/uc-php
-UCPHP_CFLAGS="-I${UCPHP_PATH}/dependencies/uc-php-ffi/includes -I${STACK_PATH}/lib/ghc-8.6.4/include"
-UCPHP_LDFLAGS="-L${UCPHP_PATH} -L${STACK_PATH}/lib/ghc-8.6.4/rts -Wl,-rpath,${STACK_PATH}/lib/ghc-8.6.4/rts"
-UCPHP_LIBS="${UCPHP_LDFLAGS} -lucphp_ffi -lHSrts-ghc8.6.4"
+UCPHP_CFLAGS="-I${UCPHP_PATH}/dependencies/uc-php-ffi/includes -I${STACK_PATH}/lib/ghc-${STACK_VERSION}/include"
+UCPHP_LDFLAGS="-L${UCPHP_PATH} -L${STACK_PATH}/lib/ghc-${STACK_VERSION}/rts -Wl,-rpath,${STACK_PATH}/lib/ghc-${STACK_VERSION}/rts"
+UCPHP_LIBS="${UCPHP_LDFLAGS} -lucphp_ffi -lHSrts-ghc${STACK_VERSION}"
 
 PROTOBUF_CLIENT_PATH=/home/soh/git/uc-php/dependencies/uc-php-proto-client
 PROTOBUF_CLIENT_CFLAGS="-I${PROTOBUF_CLIENT_PATH}/includes"
