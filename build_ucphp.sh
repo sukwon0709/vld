@@ -19,10 +19,14 @@ UCPHP_CFLAGS="-I${UCPHP_PATH}/dependencies/uc-php-ffi/includes -I${STACK_PATH}/l
 UCPHP_LDFLAGS="-L${UCPHP_PATH} -L${STACK_PATH}/lib/ghc-${STACK_VERSION}/rts -Wl,-rpath,${STACK_PATH}/lib/ghc-${STACK_VERSION}/rts"
 UCPHP_LIBS="${UCPHP_LDFLAGS} -lucphp_ffi -lHSrts-ghc${STACK_VERSION}"
 
+PROTOBUF_CFLAGS=`pkg-config --cflags protobuf`
+PROTOBUF_LIBS=`pkg-config --libs protobuf`
+GRPC_LIBS=`pkg-config --libs grpc grpc++`
+
 PROTOBUF_CLIENT_PATH=/home/soh/git/uc-php/dependencies/uc-php-proto-client
 PROTOBUF_CLIENT_CFLAGS="-I${PROTOBUF_CLIENT_PATH}/includes"
 PROTOBUF_CLIENT_LDFLAGS="-L${PROTOBUF_CLIENT_PATH}"
-PROTOBUF_CLIENT_LIBS="${PROTOBUF_CLIENT_LDFLAGS} -lprotobuf -lgrpc -lgrpc++ -lucphp_proto_client -lstdc++"
+PROTOBUF_CLIENT_LIBS="${PROTOBUF_CLIENT_LDFLAGS} ${PROTOBUF_LIBS} ${GRPC_LIBS} -lucphp_proto_client -lstdc++"
 
 MM_PATH=/home/soh/git/uc-php/dependencies/uc-php-mm
 MM_CFLAGS="-I${MM_PATH}"
