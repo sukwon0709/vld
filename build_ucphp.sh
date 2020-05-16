@@ -1,6 +1,7 @@
 #!/bin/bash
 
 PREFIX_PATH=/home/soh/concolic_php
+#PREFIX_PATH=/home/soh/php-5.6.40
 STACK_VERSION=8.6.5
 STACK_PATH="/home/soh/.stack/programs/x86_64-linux/ghc-${STACK_VERSION}"
 
@@ -48,3 +49,4 @@ LDFLAGS="${ZLOG_LDFLAGS} ${XXHASH_LDFLAGS} ${UCPHP_LDFLAGS} ${PROTOBUF_CLIENT_LD
 LIBS="${ZLOG_LIBS} ${XXHASH_LIBS} ${UCPHP_LIBS} ${PROTOBUF_CLIENT_LIBS} ${MM_LIBS} ${TARGETS_LIBS}"
 
 ./configure --prefix=${PREFIX_PATH} --with-php-config=${PREFIX_PATH}/bin/php-config CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" LIBS="${LIBS}"
+#./configure --prefix=${PREFIX_PATH} --with-php-config=${PREFIX_PATH}/bin/php-config CFLAGS="${XXHASH_CFLAGS} ${PROTOBUF_CLIENT_CFLAGS}" LDFLAGS="${XXHASH_LDFLAGS} ${PROTOBUF_CLIENT_LDFLAGS}" LIBS="${XXHASH_LIBS} ${PROTOBUF_CLIENT_LIBS}"
