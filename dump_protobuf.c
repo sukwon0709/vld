@@ -109,34 +109,75 @@ OpcodeList *ucphp_dump_opcodes(zend_op_array *opa) {
         if (zend_hash_find(user_defined_table, Z_STRVAL_P(op.op1.zv),
                            Z_STRLEN_P(op.op1.zv) + 1,
                            (void **)&fe) == SUCCESS) {
-          set_function_call_opcode(op_proto, (*fe)->function_name);
+          set_user_defined_function_call_opcode(op_proto, (*fe)->function_name);
           printf("USER-DEFINED DO_FCALL::  %s\n", (*fe)->function_name);
         } else {
-          set_function_call_opcode(op_proto, Z_STRVAL_P(op.op1.zv));
+          set_builtin_function_call_opcode(op_proto, Z_STRVAL_P(op.op1.zv));
           printf("DO_FCALL::  %s\n", Z_STRVAL_P(op.op1.zv));
         }
       } else {
-        assert(0);
+        set_unknown_function_call_opcode(op_proto);
+        printf("UNKNOWN DO_FCALL\n");
       }
     } else if (op.opcode == ZEND_INIT_FCALL_BY_NAME) {
       if (op.op1_type == IS_UNUSED && op.op2_type == IS_CONST) {
         // user-defined?
-        set_function_call_opcode(op_proto, Z_STRVAL_P(op.op2.zv));
+        set_user_defined_function_call_opcode(op_proto, Z_STRVAL_P(op.op2.zv));
         printf("DO_FCALL_BY_NAME:: %s\n", Z_STRVAL_P(op.op2.zv));
       } else {
-        assert(0);
+        set_unknown_function_call_opcode(op_proto);
+        printf("UNKNOWN DO_FCALL_BY_NAME\n");
       }
     } else if (op.opcode == ZEND_INCLUDE_OR_EVAL) {
-      if ((op.extended_value & ZEND_EVAL) == 0) {
+      switch (op.extended_value) {
+      case ZEND_INCLUDE_ONCE:
         if (op.op1_type == IS_CONST) {
-          set_file_include_opcode(op_proto, Z_STRVAL_P(op.op1.zv));
-          printf("INCLUDE_OR_EVAL:: %s\n", Z_STRVAL_P(op.op1.zv));
+          set_file_include_once_opcode(op_proto, Z_STRVAL_P(op.op1.zv),
+                                       opa->filename);
+          printf("INCLUDE_ONCE:: %s from %s\n", Z_STRVAL_P(op.op1.zv),
+                 opa->filename);
         } else {
-          assert(0);
+          set_unknown_file_include_once_opcode(op_proto);
+          printf("UNKNOWN_INCLUDE_ONCE\n");
         }
-      } else {
-        // should be eval().
-        assert(0);
+        break;
+      case ZEND_REQUIRE_ONCE:
+        if (op.op1_type == IS_CONST) {
+          set_file_require_once_opcode(op_proto, Z_STRVAL_P(op.op1.zv),
+                                       opa->filename);
+          printf("REQUIRE_ONCE:: %s from %s\n", Z_STRVAL_P(op.op1.zv),
+                 opa->filename);
+        } else {
+          set_unknown_file_require_once_opcode(op_proto);
+          printf("UNKNOWN_REQUIRE_ONCE\n");
+        }
+        break;
+      case ZEND_INCLUDE:
+        if (op.op1_type == IS_CONST) {
+          set_file_include_opcode(op_proto, Z_STRVAL_P(op.op1.zv),
+                                  opa->filename);
+          printf("INCLUDE:: %s from %s\n", Z_STRVAL_P(op.op1.zv),
+                 opa->filename);
+        } else {
+          set_unknown_file_include_opcode(op_proto);
+          printf("UNKNOWN_INCLUDE\n");
+        }
+        break;
+      case ZEND_REQUIRE:
+        if (op.op1_type == IS_CONST) {
+          set_file_require_opcode(op_proto, Z_STRVAL_P(op.op1.zv),
+                                  opa->filename);
+          printf("REQUIRE:: %s from %s\n", Z_STRVAL_P(op.op1.zv),
+                 opa->filename);
+        } else {
+          set_unknown_file_require_opcode(op_proto);
+          printf("UNKNOWN_REQUIRE\n");
+        }
+        break;
+      case ZEND_EVAL:
+        // TODO: May need to handle in the future.
+        /* assert(0); */
+        break;
       }
     }
   }
