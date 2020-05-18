@@ -958,6 +958,9 @@ vld_analyse_branch(zend_op_array* opa,
 
     /**
      * Detects if next opcode is INCLUDE or FCALL.
+     * Opcodes for function calls:
+     * - ZEND_DO_FCALL
+     * - ZEND_DO_FCALL_BY_NAME (must be matched by ZEND_INIT_FCALL_BY_NAME).
      * Make next opcode new branches and connect current branch to the next
      * branches.
      */
