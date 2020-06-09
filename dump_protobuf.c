@@ -4,6 +4,7 @@
 #include "php.h"
 #include "php_globals.h"
 #include "php_ini.h"
+#include "zend_compile.h"
 #include "zend_hash.h"
 
 ZEND_EXTERN_MODULE_GLOBALS(vld)
@@ -16,11 +17,16 @@ ZEND_EXTERN_MODULE_GLOBALS(vld)
 #define APPLY_TSRMLS_DC
 #endif
 
+#define RETURN_VALUE_USED(opline) (!((opline)->result_type & EXT_TYPE_UNUSED))
+
+#define EX_T(offset)                                                           \
+  (*EX_TMP_VAR(executor_globals->current_execute_data, offset))
+#define EX_CV(var) (*EX_CV_NUM(executor_globals->current_execute_data, var))
+
 // Stores a table of user defined functions.
 static HashTable *user_defined_table;
-static zend_op *call_stack[100] = {NULL};
-static int call_stack_top = 0;           // index for next element.
-static int init_call_by_name_called = 0; // flag to distinguish call approach
+static zend_op *call_stack[10000] = {NULL};
+static int call_stack_top = 0; // index for next element.
 
 char *toLower(const char *str, int len) {
   char *str2 = emalloc(sizeof(char) * len + 1);
@@ -122,18 +128,48 @@ OpcodeList *ucphp_dump_opcodes(zend_op_array *opa) {
         set_unknown_function_call_opcode(op_proto);
         printf("UNKNOWN DO_FCALL\n");
       }
+    } else if (op.opcode == ZEND_FETCH_CLASS) {
+      if (op.op2_type == IS_CONST) {
+        zval *class_name = op.op2.zv;
+        printf("CLASS %s FOUND!\n", Z_STRVAL_P(class_name));
+        call_stack[call_stack_top++] = &opa->opcodes[i];
+      }
+    } else if (op.opcode == ZEND_NEW) {
+    } else if (op.opcode == ZEND_INIT_METHOD_CALL) {
+      if (op.op2_type == IS_CONST) {
+        printf("METHOD CALL %s FOUND!\n", Z_STRVAL_P(op.op2.zv));
+        call_stack[call_stack_top++] = &opa->opcodes[i];
+      }
     } else if (op.opcode == ZEND_INIT_FCALL_BY_NAME) {
       call_stack[call_stack_top++] = &opa->opcodes[i];
-      init_call_by_name_called = 1;
     } else if (op.opcode == ZEND_DO_FCALL_BY_NAME) {
-      if (init_call_by_name_called == 1) {
-        zend_op fop = *call_stack[--call_stack_top];
-        init_call_by_name_called = 0;
-        if (fop.op1_type == IS_UNUSED && fop.op2_type == IS_CONST) {
+      assert(call_stack_top > 0);
+      zend_op cop = *call_stack[--call_stack_top];
+      if (cop.opcode == ZEND_FETCH_CLASS) {
+        if (cop.op1_type == IS_UNUSED && cop.op2_type == IS_CONST) {
+          set_user_defined_method_opcode(op_proto, Z_STRVAL_P(cop.op2.zv),
+                                         Z_STRVAL_P(cop.op2.zv));
+          printf("DO_FCALL_BY_NAME:: %s::%s\n", Z_STRVAL_P(cop.op2.zv),
+                 Z_STRVAL_P(cop.op2.zv));
+        } else {
+          set_unknown_method_opcode(op_proto);
+          printf("UNKNOWN METHOD DO_FCALL_BY_NAME\n");
+        }
+      } else if (cop.opcode == ZEND_INIT_METHOD_CALL) {
+        if (cop.op2_type == IS_CONST) {
+          set_user_defined_method_opcode(op_proto, NULL,
+                                         Z_STRVAL_P(cop.op2.zv));
+          printf("DO_FCALL_BY_NAME:: ?::%s\n", Z_STRVAL_P(cop.op2.zv));
+        } else {
+          set_unknown_method_opcode(op_proto);
+          printf("UNKNOWN METHOD DO_FCALL_BY_NAME\n");
+        }
+      } else if (cop.opcode == ZEND_INIT_FCALL_BY_NAME) {
+        if (cop.op1_type == IS_UNUSED && cop.op2_type == IS_CONST) {
           // user-defined?
           set_user_defined_function_call_opcode(op_proto,
-                                                Z_STRVAL_P(fop.op2.zv));
-          printf("DO_FCALL_BY_NAME:: %s\n", Z_STRVAL_P(fop.op2.zv));
+                                                Z_STRVAL_P(cop.op2.zv));
+          printf("DO_FCALL_BY_NAME:: %s\n", Z_STRVAL_P(cop.op2.zv));
         } else {
           set_unknown_function_call_opcode(op_proto);
           printf("UNKNOWN DO_FCALL_BY_NAME\n");

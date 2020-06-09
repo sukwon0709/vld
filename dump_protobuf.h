@@ -1,7 +1,7 @@
 #ifndef DUMP_PROTOBUF_H_
 #define DUMP_PROTOBUF_H_
 
-#include "UCPHPCClient.h"
+#include "php_opcode/UCPHPCClient.h"
 
 #include "branchinfo.h"
 #include "php_vld.h"

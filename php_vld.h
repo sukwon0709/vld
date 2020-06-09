@@ -15,7 +15,7 @@
 #define PHP_VLD_H
 
 #include "php.h"
-#include "Opcode.h"
+#include "php_opcode/Opcode.h"
 
 extern zend_module_entry vld_module_entry;
 #define phpext_vld_ptr &vld_module_entry
