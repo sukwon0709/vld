@@ -129,16 +129,16 @@ OpcodeList *ucphp_dump_opcodes(zend_op_array *opa) {
         printf("UNKNOWN DO_FCALL\n");
       }
     } else if (op.opcode == ZEND_FETCH_CLASS) {
+      call_stack[call_stack_top++] = &opa->opcodes[i];
       if (op.op2_type == IS_CONST) {
         zval *class_name = op.op2.zv;
         printf("CLASS %s FOUND!\n", Z_STRVAL_P(class_name));
-        call_stack[call_stack_top++] = &opa->opcodes[i];
       }
     } else if (op.opcode == ZEND_NEW) {
     } else if (op.opcode == ZEND_INIT_METHOD_CALL) {
+      call_stack[call_stack_top++] = &opa->opcodes[i];
       if (op.op2_type == IS_CONST) {
         printf("METHOD CALL %s FOUND!\n", Z_STRVAL_P(op.op2.zv));
-        call_stack[call_stack_top++] = &opa->opcodes[i];
       }
     } else if (op.opcode == ZEND_INIT_FCALL_BY_NAME) {
       call_stack[call_stack_top++] = &opa->opcodes[i];
