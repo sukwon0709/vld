@@ -166,6 +166,16 @@ OpcodeList *ucphp_dump_opcodes(zend_op_array *opa) {
           set_unknown_method_opcode(op_proto);
           printf("UNKNOWN METHOD DO_FCALL_BY_NAME\n");
         }
+      } else if (cop.opcode == ZEND_INIT_STATIC_METHOD_CALL) {
+        if (cop.op1_type == IS_CONST && cop.op2_type == IS_CONST) {
+          set_user_defined_method_opcode(op_proto, Z_STRVAL_P(cop.op1.zv),
+                                         Z_STRVAL_P(cop.op2.zv));
+        } else if (cop.op2_type == IS_CONST) {
+          set_user_defined_method_opcode(op_proto, NULL,
+                                         Z_STRVAL_P(cop.op2.zv));
+        } else {
+          set_unknown_method_opcode(op_proto);
+        }
       } else if (cop.opcode == ZEND_INIT_METHOD_CALL) {
         if (cop.op2_type == IS_CONST) {
           set_user_defined_method_opcode(op_proto, NULL,
