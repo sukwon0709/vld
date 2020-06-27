@@ -135,6 +135,17 @@ OpcodeList *ucphp_dump_opcodes(zend_op_array *opa) {
         printf("CLASS %s FOUND!\n", Z_STRVAL_P(class_name));
       }
     } else if (op.opcode == ZEND_NEW) {
+    } else if (op.opcode == ZEND_INIT_STATIC_METHOD_CALL) {
+      call_stack[call_stack_top++] = &opa->opcodes[i];
+      if (op.op1_type == IS_CONST && op.op2_type == IS_CONST) {
+        zval *class_name = op.op1.zv;
+        zval *method_name = op.op2.zv;
+        printf("STATIC METHOD CALL %s::%s FOUND!\n", Z_STRVAL_P(class_name),
+               Z_STRVAL_P(method_name));
+      } else if (op.op2_type == IS_CONST) {
+        zval *method_name = op.op2.zv;
+        printf("STATIC METHOD CALL ?::%s FOUND!\n", Z_STRVAL_P(method_name));
+      }
     } else if (op.opcode == ZEND_INIT_METHOD_CALL) {
       call_stack[call_stack_top++] = &opa->opcodes[i];
       if (op.op2_type == IS_CONST) {
